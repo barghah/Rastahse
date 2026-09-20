@@ -1,0 +1,31 @@
+/* Rastahse brand tokens — measured from RASTAH.pdf (raster source, so values are +/- a few units) */
+:root {
+  /* core */
+  --ink:            #313130; /* charcoal: stone shapes, logo body, body text */
+  --berry:          #6c0222; /* primary accent: the fruit on the primary logo */
+  --paper:          #ffffff; /* PDF page background */
+
+  /* wordmark */
+  --wordmark:       #4e4e4e; /* RASTAH lettering, full-strength version (page 1) */
+  --brick:          #ad3d3d; /* the "से" in the full-strength wordmark (page 1) — use sparingly */
+  --wordmark-faded: #717171; /* RASTAH lettering inside the primary lockup (page 4) */
+  --se-mauve:       #996171; /* the "से" inside the primary lockup (page 4) */
+
+  /* category fruit colours (page 5) */
+  --berry-deep:     #48010d; /* Apparel */
+  --plum:           #57253e; /* Jewelry */
+  --navy:           #0f1b37; /* Ceramic */
+  --olive:          #4e5332; /* Home Decor */
+
+  /* mockup palette (pages 7-14) */
+  --kraft:          #c2a18d; /* paper bag / envelope */
+  --kraft-deep:     #90735b; /* stone / wood tones */
+  --mist:           #d0cdd2; /* light grey backdrop */
+  --mauve:          #823e55; /* the mauve card / wall */
+
+  /* derived, not in the PDF: kraft at 12% over white, for soft page sections */
+  --surface:        #f8f4f1;
+
+  /* brand motif grey (page 3 shapes) */
+  --motif:          #5d5d5f;
+}

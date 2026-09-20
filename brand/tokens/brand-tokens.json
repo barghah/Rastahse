@@ -1,0 +1,32 @@
+{
+  "source": "brand/RASTAH.pdf (Canva export). Values measured from the rendered pages; raster source so treat as +/- a few units.",
+  "color": {
+    "ink": "#313130",
+    "berry": "#6c0222",
+    "paper": "#ffffff",
+    "wordmark": "#4e4e4e",
+    "brick": "#ad3d3d",
+    "wordmarkFaded": "#717171",
+    "seMauve": "#996171",
+    "berryDeep": "#48010d",
+    "plum": "#57253e",
+    "navy": "#0f1b37",
+    "olive": "#4e5332",
+    "kraft": "#c2a18d",
+    "kraftDeep": "#90735b",
+    "mist": "#d0cdd2",
+    "mauve": "#823e55",
+    "surface": "#f8f4f1",
+    "motif": "#5d5d5f"
+  },
+  "categoryAccent": {
+    "apparel": "berryDeep",
+    "jewelry": "plum",
+    "ceramic": "navy",
+    "home-decor": "olive"
+  },
+  "fonts": {
+    "brandHand": "Six Hands Marker (fallback: Patrick Hand)",
+    "labels": "Poppins Light 300, uppercase, letter-spacing 0.3em (Google Fonts match for the category labels)"
+  }
+}

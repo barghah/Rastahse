@@ -1,0 +1,2109 @@
+{
+  "categories": [
+    {
+      "slug": "apparel",
+      "name": "Apparel",
+      "iconPath": "/brand/icons/apparel.png",
+      "fruitColor": "#48010d",
+      "visible": true,
+      "sortOrder": 1,
+      "description": "Handwoven textiles, carryalls, bandanas, and heirloom pashminas carrying living traditions."
+    },
+    {
+      "slug": "ceramic",
+      "name": "Ceramic",
+      "iconPath": "/brand/icons/ceramic.png",
+      "fruitColor": "#0f1b37",
+      "visible": true,
+      "sortOrder": 2,
+      "description": "Hand-thrown stoneware and Jaipur blue pottery shaped by generational studio potters."
+    },
+    {
+      "slug": "home-decor",
+      "name": "Home Décor",
+      "iconPath": "/brand/icons/home-decor.png",
+      "fruitColor": "#4e5332",
+      "visible": true,
+      "sortOrder": 3,
+      "description": "Tribal rugs, brass mirrors, hand-bound journals, and ambient light pieces with a soul."
+    },
+    {
+      "slug": "jewelry",
+      "name": "Jewelry",
+      "iconPath": "/brand/icons/jewelry.png",
+      "fruitColor": "#57253e",
+      "visible": true,
+      "sortOrder": 4,
+      "description": "Ritual bronze collars, Konyak beadwork, and artisan silver shaped with timeless precision."
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_002",
+      "slug": "koodai-bag",
+      "name": "Koodai Bag",
+      "origin": "Pondicherry, Tamil Nadu",
+      "description": "Koodai Bag from Pondicherry, Tamil Nadu. Woven by hand in coastal Pondicherry using traditional ribbed palm-leaf and wire technique. Lightweight, durable, and completely weatherproof.",
+      "story": "Woven by hand in coastal Pondicherry using traditional ribbed palm-leaf and wire technique. Lightweight, durable, and completely weatherproof.",
+      "curatorNote": "Pairs effortlessly with raw linen or cotton kurtas.",
+      "price": 185000,
+      "comparePrice": 220000,
+      "categorySlug": "apparel",
+      "tags": [
+        "#handmade",
+        "#pondicherry",
+        "#woven",
+        "#sustainable",
+        "#tote"
+      ],
+      "images": [
+        {
+          "url": "/products/p2_koodai-bag.jpeg",
+          "alt": "Koodai Bag from Pondicherry, Tamil Nadu",
+          "width": 700,
+          "height": 700
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_002_natural",
+          "name": "Natural Palm",
+          "sku": "KOD-NAT-001",
+          "stock": 12,
+          "lowStockThreshold": 3
+        },
+        {
+          "id": "var_002_indigo",
+          "name": "Indigo Trim",
+          "sku": "KOD-IND-002",
+          "stock": 6,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 1,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_003",
+      "slug": "hand-bound-leather-journal",
+      "name": "Hand-Bound Leather Journal",
+      "origin": "Udaipur, Rajasthan",
+      "description": "Hand-Bound Leather Journal from Udaipur, Rajasthan. Crafted in the alleyways of Udaipur with vegetable-tanned goat leather and deckle-edged recycled cotton paper. Smells of old libraries and cedar.",
+      "story": "Crafted in the alleyways of Udaipur with vegetable-tanned goat leather and deckle-edged recycled cotton paper. Smells of old libraries and cedar.",
+      "curatorNote": "Takes fountain pen ink with zero bleed.",
+      "price": 145000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#udaipur",
+        "#rajasthan",
+        "#leather",
+        "#journal",
+        "#handmade"
+      ],
+      "images": [
+        {
+          "url": "/products/p3_leather-journal.jpeg",
+          "alt": "Hand-Bound Leather Journal from Udaipur, Rajasthan",
+          "width": 474,
+          "height": 474
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_003_tan",
+          "name": "Saddle Tan",
+          "sku": "LJ-TAN-001",
+          "stock": 9,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_004",
+      "slug": "vintage-saree-fabric-journal",
+      "name": "Vintage Saree Fabric Journal",
+      "origin": "Udaipur, Rajasthan",
+      "description": "Vintage Saree Fabric Journal from Udaipur, Rajasthan. Repurposed antique silk and zari borders from Rajasthan, binding 100 pages of handmade cotton rag parchment.",
+      "story": "Repurposed antique silk and zari borders from Rajasthan, binding 100 pages of handmade cotton rag parchment.",
+      "curatorNote": "Each cover is distinct — no two journals share the same pattern cut.",
+      "price": 120000,
+      "comparePrice": 140000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#upcycled",
+        "#saree",
+        "#udaipur",
+        "#cottonpaper",
+        "#handmade"
+      ],
+      "images": [
+        {
+          "url": "/products/p4_saree-fabric-journal.jpeg",
+          "alt": "Vintage Saree Fabric Journal from Udaipur, Rajasthan",
+          "width": 500,
+          "height": 500
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_004_crimson",
+          "name": "Crimson Silk",
+          "sku": "SJ-CRM-001",
+          "stock": 1,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_005",
+      "slug": "raw-cotton-paper-journal",
+      "name": "Raw Cotton Paper Journal",
+      "origin": "Udaipur, Rajasthan",
+      "description": "Raw Cotton Paper Journal from Udaipur, Rajasthan. Unbleached, sun-dried rag paper bound with natural jute thread. Made without trees or chemicals in Sanganer.",
+      "story": "Unbleached, sun-dried rag paper bound with natural jute thread. Made without trees or chemicals in Sanganer.",
+      "curatorNote": "A clean companion for sketches, graphite, and quiet thoughts.",
+      "price": 95000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#cottonpaper",
+        "#deckleedge",
+        "#minimal",
+        "#rajasthan"
+      ],
+      "images": [
+        {
+          "url": "/products/p5_paper-journal.jpeg",
+          "alt": "Raw Cotton Paper Journal from Udaipur, Rajasthan",
+          "width": 500,
+          "height": 500
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_005_ivory",
+          "name": "Natural Ivory",
+          "sku": "PJ-IVO-001",
+          "stock": 15,
+          "lowStockThreshold": 4
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_006",
+      "slug": "ethnic-embroidered-fabric-journal",
+      "name": "Ethnic Embroidered Fabric Journal",
+      "origin": "Udaipur, Rajasthan",
+      "description": "Ethnic Embroidered Fabric Journal from Udaipur, Rajasthan. Mirror work and thread embroidery preserved from Marwar dowry textiles, refitted onto hardback archival journals.",
+      "story": "Mirror work and thread embroidery preserved from Marwar dowry textiles, refitted onto hardback archival journals.",
+      "curatorNote": "Rich tactile texture in deep rust and saffron.",
+      "price": 165000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#embroidery",
+        "#udaipur",
+        "#folkart",
+        "#journal"
+      ],
+      "images": [
+        {
+          "url": "/products/p6_ethnic-indian-embroidery-journal.jpeg",
+          "alt": "Ethnic Embroidered Fabric Journal from Udaipur, Rajasthan",
+          "width": 600,
+          "height": 471
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_006_rust",
+          "name": "Marwar Rust",
+          "sku": "EJ-RST-001",
+          "stock": 1,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_007",
+      "slug": "traditional-konyak-beaded-necklace",
+      "name": "Traditional Konyak Beaded Necklace",
+      "origin": "Longwa, Nagaland",
+      "description": "Traditional Konyak Beaded Necklace from Longwa, Nagaland. Multi-strand glass bead necklace strung by elder women in Longwa, Nagaland. Historically worn during harvest ceremonies and cultural rites.",
+      "story": "Multi-strand glass bead necklace strung by elder women in Longwa, Nagaland. Historically worn during harvest ceremonies and cultural rites.",
+      "curatorNote": "Stands proud as wearable sculpture.",
+      "price": 380000,
+      "comparePrice": 450000,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#nagaland",
+        "#konyak",
+        "#tribal",
+        "#heirloom",
+        "#glassbeads"
+      ],
+      "images": [
+        {
+          "url": "/products/p7_traditional-necklace-of-the-konyak.jpeg",
+          "alt": "Traditional Konyak Beaded Necklace from Longwa, Nagaland",
+          "width": 1251,
+          "height": 1192
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_007_orange",
+          "name": "Fire Ochre & Turquoise",
+          "sku": "KNK-NECK-001",
+          "stock": 2,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 2,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_008",
+      "slug": "ritual-bronze-collar-konyak-tribe",
+      "name": "Ritual Bronze Collar — Konyak Tribe",
+      "origin": "Longwa, Nagaland",
+      "description": "Ritual Bronze Collar — Konyak Tribe from Longwa, Nagaland. Lost-wax cast bronze torque collar bearing symbolic ancestral human heads, worn by warriors and elders of Longwa village.",
+      "story": "Lost-wax cast bronze torque collar bearing symbolic ancestral human heads, worn by warriors and elders of Longwa village.",
+      "curatorNote": "Heavy, resonant metalwork with deep antique patina.",
+      "price": 620000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#nagaland",
+        "#bronze",
+        "#konyak",
+        "#museumquality",
+        "#rare"
+      ],
+      "images": [
+        {
+          "url": "/products/p8_ritual-bronze-collar-konyak-tribe.jpeg",
+          "alt": "Ritual Bronze Collar — Konyak Tribe from Longwa, Nagaland",
+          "width": 1055,
+          "height": 1055
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_008_bronze",
+          "name": "Antique Patina Bronze",
+          "sku": "KNK-COL-001",
+          "stock": 1,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 3,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_009",
+      "slug": "kashmiri-crewel-hand-bag",
+      "name": "Kashmiri Crewel Hand-Bag",
+      "origin": "Kashmir",
+      "description": "Kashmiri Crewel Hand-Bag from Kashmir. Chain-stitch Ari needlework on dense unbleached cotton duck cloth. Wool dyed with walnut shells and wild pomegranate peels.",
+      "story": "Chain-stitch Ari needlework on dense unbleached cotton duck cloth. Wool dyed with walnut shells and wild pomegranate peels.",
+      "curatorNote": "Roomy structured profile with leather reinforced trim.",
+      "price": 280000,
+      "comparePrice": 320000,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#crewel",
+        "#embroidery",
+        "#wool",
+        "#bag"
+      ],
+      "images": [
+        {
+          "url": "/products/p9_hand-bag.jpeg",
+          "alt": "Kashmiri Crewel Hand-Bag from Kashmir",
+          "width": 500,
+          "height": 333
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_009_multi",
+          "name": "Forest Floral",
+          "sku": "KSH-HB-001",
+          "stock": 4,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_010",
+      "slug": "kashmiri-needlework-flap-purse",
+      "name": "Kashmiri Needlework Flap Purse",
+      "origin": "Kashmir",
+      "description": "Kashmiri Needlework Flap Purse from Kashmir. Fine needlepoint floral embroidery across the magnetic flap, featuring paisley and iris motifs native to Srinagar gardens.",
+      "story": "Fine needlepoint floral embroidery across the magnetic flap, featuring paisley and iris motifs native to Srinagar gardens.",
+      "curatorNote": "Compact, refined cross-body piece.",
+      "price": 195000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#flapbag",
+        "#embroidery",
+        "#artisan"
+      ],
+      "images": [
+        {
+          "url": "/products/p10_flap-purse.jpeg",
+          "alt": "Kashmiri Needlework Flap Purse from Kashmir",
+          "width": 700,
+          "height": 934
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_010_walnut",
+          "name": "Walnut Charcoal",
+          "sku": "KSH-FP-001",
+          "stock": 5,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_011",
+      "slug": "kashmiri-embroidered-slim-bag-ochre",
+      "name": "Kashmiri Embroidered Slim-Bag — Ochre",
+      "origin": "Kashmir",
+      "description": "Kashmiri Embroidered Slim-Bag — Ochre from Kashmir. Slender cross-body pouch for essentials, phone, and keys. Embroidered by hand on handspun wool felt.",
+      "story": "Slender cross-body pouch for essentials, phone, and keys. Embroidered by hand on handspun wool felt.",
+      "curatorNote": "Bright ochre tones that add warmth to any outfit.",
+      "price": 155000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#slimbag",
+        "#everyday",
+        "#crewel"
+      ],
+      "images": [
+        {
+          "url": "/products/p11_slim-bag.jpeg",
+          "alt": "Kashmiri Embroidered Slim-Bag — Ochre from Kashmir",
+          "width": 203,
+          "height": 250
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_011_ochre",
+          "name": "Warm Ochre",
+          "sku": "KSH-SB-001",
+          "stock": 7,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_012",
+      "slug": "kashmiri-embroidered-slim-bag-indigo",
+      "name": "Kashmiri Embroidered Slim-Bag — Indigo",
+      "origin": "Kashmir",
+      "description": "Kashmiri Embroidered Slim-Bag — Indigo from Kashmir. Deep indigo ground with white and sky-blue crewel vines, woven in the winter months along Dal Lake.",
+      "story": "Deep indigo ground with white and sky-blue crewel vines, woven in the winter months along Dal Lake.",
+      "curatorNote": "Versatile companion for day markets.",
+      "price": 155000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#slimbag",
+        "#indigo",
+        "#crewel"
+      ],
+      "images": [
+        {
+          "url": "/products/p12_slim-bag.jpeg",
+          "alt": "Kashmiri Embroidered Slim-Bag — Indigo from Kashmir",
+          "width": 395,
+          "height": 395
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_012_indigo",
+          "name": "Deep Indigo",
+          "sku": "KSH-SB-002",
+          "stock": 6,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_013",
+      "slug": "kashmiri-embroidered-slim-bag-berry",
+      "name": "Kashmiri Embroidered Slim-Bag — Berry",
+      "origin": "Kashmir",
+      "description": "Kashmiri Embroidered Slim-Bag — Berry from Kashmir. Rich berry ground accented with golden yellow silk floss embroidery, finished with an adjustable cotton cord strap.",
+      "story": "Rich berry ground accented with golden yellow silk floss embroidery, finished with an adjustable cotton cord strap.",
+      "curatorNote": "Matches the brand signature berry hue.",
+      "price": 155000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#slimbag",
+        "#berry",
+        "#crewel"
+      ],
+      "images": [
+        {
+          "url": "/products/p13_slim-bag.jpeg",
+          "alt": "Kashmiri Embroidered Slim-Bag — Berry from Kashmir",
+          "width": 640,
+          "height": 640
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_013_berry",
+          "name": "Rastah Berry",
+          "sku": "KSH-SB-003",
+          "stock": 5,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_014",
+      "slug": "kashmiri-embroidered-slim-bag-sage",
+      "name": "Kashmiri Embroidered Slim-Bag — Sage",
+      "origin": "Kashmir",
+      "description": "Kashmiri Embroidered Slim-Bag — Sage from Kashmir. Subtle olive and sage tones hand-stitched on natural wool backing.",
+      "story": "Subtle olive and sage tones hand-stitched on natural wool backing.",
+      "curatorNote": "Understated and tactile.",
+      "price": 155000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#slimbag",
+        "#sage",
+        "#crewel"
+      ],
+      "images": [
+        {
+          "url": "/products/p14_slim-bag.jpeg",
+          "alt": "Kashmiri Embroidered Slim-Bag — Sage from Kashmir",
+          "width": 474,
+          "height": 609
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_014_sage",
+          "name": "Valley Sage",
+          "sku": "KSH-SB-004",
+          "stock": 8,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_015",
+      "slug": "kashmiri-embroidered-slim-bag-terra",
+      "name": "Kashmiri Embroidered Slim-Bag — Terra",
+      "origin": "Kashmir",
+      "description": "Kashmiri Embroidered Slim-Bag — Terra from Kashmir. Terracotta and rust threadwork depicting stylized walnut leaves and chinar flowers.",
+      "story": "Terracotta and rust threadwork depicting stylized walnut leaves and chinar flowers.",
+      "curatorNote": "A customer favourite for quick travel.",
+      "price": 155000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#slimbag",
+        "#terracotta",
+        "#crewel"
+      ],
+      "images": [
+        {
+          "url": "/products/p15_slim-bag.jpeg",
+          "alt": "Kashmiri Embroidered Slim-Bag — Terra from Kashmir",
+          "width": 700,
+          "height": 1301
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_015_terra",
+          "name": "Terracotta",
+          "sku": "KSH-SB-005",
+          "stock": 4,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_016",
+      "slug": "indo-persian-embroidered-silk-bandana",
+      "name": "Indo-Persian Embroidered Silk Bandana",
+      "origin": "India-Persia",
+      "description": "Indo-Persian Embroidered Silk Bandana from India-Persia. Fine silk-mulberry square featuring hand-embroidered buta motifs inspired by 17th-century Mughal floral borders.",
+      "story": "Fine silk-mulberry square featuring hand-embroidered buta motifs inspired by 17th-century Mughal floral borders.",
+      "curatorNote": "Tie around the neck, hair, or leather tote strap.",
+      "price": 220000,
+      "comparePrice": 260000,
+      "categorySlug": "apparel",
+      "tags": [
+        "#persia",
+        "#silk",
+        "#bandana",
+        "#artisan",
+        "#scarf"
+      ],
+      "images": [
+        {
+          "url": "/products/p16_embroidered-bandana.jpeg",
+          "alt": "Indo-Persian Embroidered Silk Bandana from India-Persia",
+          "width": 1000,
+          "height": 1253
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_016_rose",
+          "name": "Vintage Rose",
+          "sku": "IP-BAN-001",
+          "stock": 8,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 4,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_017",
+      "slug": "artisan-block-printed-bandana",
+      "name": "Artisan Block-Printed Bandana",
+      "origin": "India-Persia",
+      "description": "Artisan Block-Printed Bandana from India-Persia. Hand-carved teak woodblocks pressed onto lightweight organic voile with madder root dye.",
+      "story": "Hand-carved teak woodblocks pressed onto lightweight organic voile with madder root dye.",
+      "curatorNote": "Softens with every wash.",
+      "price": 110000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#bandana",
+        "#blockprint",
+        "#naturaldye",
+        "#cotton"
+      ],
+      "images": [
+        {
+          "url": "/products/p17_bandana.jpeg",
+          "alt": "Artisan Block-Printed Bandana from India-Persia",
+          "width": 1200,
+          "height": 1200
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_017_madder",
+          "name": "Madder Rust",
+          "sku": "IP-BAN-002",
+          "stock": 14,
+          "lowStockThreshold": 4
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_018",
+      "slug": "geometric-heritage-bandana",
+      "name": "Geometric Heritage Bandana",
+      "origin": "India-Persia",
+      "description": "Geometric Heritage Bandana from India-Persia. Indigo-dipped square bandana with border grid lines hand-drawn with wax resist.",
+      "story": "Indigo-dipped square bandana with border grid lines hand-drawn with wax resist.",
+      "curatorNote": "Effortless unisex bandana.",
+      "price": 110000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#bandana",
+        "#geometric",
+        "#indigo",
+        "#handloom"
+      ],
+      "images": [
+        {
+          "url": "/products/p18_bandana.jpeg",
+          "alt": "Geometric Heritage Bandana from India-Persia",
+          "width": 736,
+          "height": 1104
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_018_indigo",
+          "name": "Indigo Grid",
+          "sku": "IP-BAN-003",
+          "stock": 10,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_019",
+      "slug": "floral-garden-silk-cotton-bandana",
+      "name": "Floral Garden Silk-Cotton Bandana",
+      "origin": "India-Persia",
+      "description": "Floral Garden Silk-Cotton Bandana from India-Persia. Botanical prints of mountain anemones and jasmine on featherweight silk-cotton blend.",
+      "story": "Botanical prints of mountain anemones and jasmine on featherweight silk-cotton blend.",
+      "curatorNote": "Airy drape and gentle sheen.",
+      "price": 145000,
+      "comparePrice": null,
+      "categorySlug": "apparel",
+      "tags": [
+        "#floral",
+        "#bandana",
+        "#silkcotton",
+        "#delicate"
+      ],
+      "images": [
+        {
+          "url": "/products/p19_floral-bandana.jpeg",
+          "alt": "Floral Garden Silk-Cotton Bandana from India-Persia",
+          "width": 1400,
+          "height": 2100
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_019_botanical",
+          "name": "Botanical Ivory",
+          "sku": "IP-BAN-004",
+          "stock": 9,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_020",
+      "slug": "hand-strung-door-strings-toran",
+      "name": "Hand-Strung Door Strings / Toran",
+      "origin": "India-Persia",
+      "description": "Hand-Strung Door Strings / Toran from India-Persia. Traditional threshold hanging composed of hand-braided wool cords, brass bells, and woolen pompoms for welcoming prosperity.",
+      "story": "Traditional threshold hanging composed of hand-braided wool cords, brass bells, and woolen pompoms for welcoming prosperity.",
+      "curatorNote": "Drape across doorways, bedheads, or sunlit window frames.",
+      "price": 240000,
+      "comparePrice": 280000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#toran",
+        "#doorstring",
+        "#persia",
+        "#handmade",
+        "#tassels"
+      ],
+      "images": [
+        {
+          "url": "/products/p20_door-strings.jpeg",
+          "alt": "Hand-Strung Door Strings / Toran from India-Persia",
+          "width": 1080,
+          "height": 1080
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_020_jewel",
+          "name": "Jewel Blend",
+          "sku": "IP-TOR-001",
+          "stock": 6,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_021",
+      "slug": "kerala-aranmula-hand-mirror",
+      "name": "Kerala Aranmula Hand Mirror",
+      "origin": "Kerala",
+      "description": "Kerala Aranmula Hand Mirror from Kerala. An extraordinary metallurgical wonder made solely of bell metal (copper and tin alloy) polished for days without glass.",
+      "story": "An extraordinary metallurgical wonder made solely of bell metal (copper and tin alloy) polished for days without glass.",
+      "curatorNote": "GI-tagged craft unique to a single family guild in Aranmula village.",
+      "price": 490000,
+      "comparePrice": 560000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#kerala",
+        "#aranmula",
+        "#metalmirror",
+        "#bellmetal",
+        "#heirloom"
+      ],
+      "images": [
+        {
+          "url": "/products/p21_hand-mirror.png",
+          "alt": "Kerala Aranmula Hand Mirror from Kerala",
+          "width": 1080,
+          "height": 1080
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_021_brass",
+          "name": "Polished Bronze",
+          "sku": "KER-HM-001",
+          "stock": 2,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 5,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_022",
+      "slug": "carved-teak-table-mirror",
+      "name": "Carved Teak Table Mirror",
+      "origin": "Kerala",
+      "description": "Carved Teak Table Mirror from Kerala. Reclaimed seasoned teakwood carved with floral arches and supported by a swivel stand.",
+      "story": "Reclaimed seasoned teakwood carved with floral arches and supported by a swivel stand.",
+      "curatorNote": "Resting piece for dressing vanity or console.",
+      "price": 320000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#kerala",
+        "#woodcraft",
+        "#tablemirror",
+        "#teak"
+      ],
+      "images": [
+        {
+          "url": "/products/p22_table-mirror.jpeg",
+          "alt": "Carved Teak Table Mirror from Kerala",
+          "width": 800,
+          "height": 800
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_022_teak",
+          "name": "Aged Teak",
+          "sku": "KER-TM-001",
+          "stock": 4,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_023",
+      "slug": "authentic-handspun-pashmina-shawl-charcoal",
+      "name": "Authentic Handspun Pashmina Shawl — Charcoal",
+      "origin": "Kashmir",
+      "description": "Authentic Handspun Pashmina Shawl — Charcoal from Kashmir. Harvested from Changthangi mountain goats at 14,000 feet in Ladakh, spun on traditional spinning charkhas and woven on handlooms in Srinagar.",
+      "story": "Harvested from Changthangi mountain goats at 14,000 feet in Ladakh, spun on traditional spinning charkhas and woven on handlooms in Srinagar.",
+      "curatorNote": "Warmth without weight. Passes through a signet ring.",
+      "price": 950000,
+      "comparePrice": 1200000,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#pashmina",
+        "#cashmere",
+        "#handspun",
+        "#heirloom"
+      ],
+      "images": [
+        {
+          "url": "/products/p23_pashmina-shawl.png",
+          "alt": "Authentic Handspun Pashmina Shawl — Charcoal from Kashmir",
+          "width": 640,
+          "height": 640
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_023_charcoal",
+          "name": "Charcoal Grey",
+          "sku": "KSH-PSH-001",
+          "stock": 3,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 6,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_024",
+      "slug": "pure-handwoven-pashmina-shawl-natural-ivory",
+      "name": "Pure Handwoven Pashmina Shawl — Natural Ivory",
+      "origin": "Kashmir",
+      "description": "Pure Handwoven Pashmina Shawl — Natural Ivory from Kashmir. Unbleached and undyed, presenting the raw natural shade of high-altitude mountain cashmere fleece.",
+      "story": "Unbleached and undyed, presenting the raw natural shade of high-altitude mountain cashmere fleece.",
+      "curatorNote": "The quintessential heirloom wrap that lasts generations.",
+      "price": 950000,
+      "comparePrice": 1200000,
+      "categorySlug": "apparel",
+      "tags": [
+        "#kashmir",
+        "#pashmina",
+        "#ivory",
+        "#purewool",
+        "#luxury"
+      ],
+      "images": [
+        {
+          "url": "/products/p24_pashmina-shawl.jpeg",
+          "alt": "Pure Handwoven Pashmina Shawl — Natural Ivory from Kashmir",
+          "width": 891,
+          "height": 1000
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_024_ivory",
+          "name": "Raw Ivory",
+          "sku": "KSH-PSH-002",
+          "stock": 2,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_025",
+      "slug": "hand-forged-brass-cuff-bracelet",
+      "name": "Hand-Forged Brass Cuff Bracelet",
+      "origin": "Delhi",
+      "description": "Hand-Forged Brass Cuff Bracelet from Delhi. Cut, annealed, and hammered by third-generation brass metalworkers in the walled quarter of Old Delhi.",
+      "story": "Cut, annealed, and hammered by third-generation brass metalworkers in the walled quarter of Old Delhi.",
+      "curatorNote": "Soft satin finish that deepens in character over time.",
+      "price": 145000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#delhi",
+        "#brass",
+        "#bracelet",
+        "#minimal",
+        "#handforged"
+      ],
+      "images": [
+        {
+          "url": "/products/p25_bracelet.jpeg",
+          "alt": "Hand-Forged Brass Cuff Bracelet from Delhi",
+          "width": 640,
+          "height": 640
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_025_matte",
+          "name": "Matte Golden Brass",
+          "sku": "DEL-BR-001",
+          "stock": 11,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_026",
+      "slug": "thread-cage-pendant-crimson-berry",
+      "name": "Thread Cage Pendant — Crimson Berry",
+      "origin": "Rjasthan",
+      "description": "Thread Cage Pendant — Crimson Berry from Rjasthan. Delicate geometric brass armature cage wrapped meticulously in silk thread by women artisans in rural Rajasthan.",
+      "story": "Delicate geometric brass armature cage wrapped meticulously in silk thread by women artisans in rural Rajasthan.",
+      "curatorNote": "Features Rastah berry accent cords.",
+      "price": 85000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#rajasthan",
+        "#pendant",
+        "#threadjewelry",
+        "#artisan"
+      ],
+      "images": [
+        {
+          "url": "/products/p26_thread-cage-pendant.jpeg",
+          "alt": "Thread Cage Pendant — Crimson Berry from Rjasthan",
+          "width": 1000,
+          "height": 1000
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_026_crimson",
+          "name": "Berry Crimson",
+          "sku": "RAJ-TC-001",
+          "stock": 8,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_027",
+      "slug": "thread-cage-pendant-lapis-blue",
+      "name": "Thread Cage Pendant — Lapis Blue",
+      "origin": "Rjasthan",
+      "description": "Thread Cage Pendant — Lapis Blue from Rjasthan. Geometric cage pendant wrapped with deep lapis blue silk threads over brass structure.",
+      "story": "Geometric cage pendant wrapped with deep lapis blue silk threads over brass structure.",
+      "curatorNote": "Featherlight and striking on high-neck tops.",
+      "price": 85000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#rajasthan",
+        "#pendant",
+        "#lapis",
+        "#jewelry"
+      ],
+      "images": [
+        {
+          "url": "/products/p27_thread-cage-pendant.jpeg",
+          "alt": "Thread Cage Pendant — Lapis Blue from Rjasthan",
+          "width": 1000,
+          "height": 1000
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_027_lapis",
+          "name": "Lapis Blue",
+          "sku": "RAJ-TC-002",
+          "stock": 7,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_028",
+      "slug": "thread-cage-pendant-golden-saffron",
+      "name": "Thread Cage Pendant — Golden Saffron",
+      "origin": "Rjasthan",
+      "description": "Thread Cage Pendant — Golden Saffron from Rjasthan. Wrapped in raw golden yellow silk floss, capturing the warmth of Rajasthani desert sunshine.",
+      "story": "Wrapped in raw golden yellow silk floss, capturing the warmth of Rajasthani desert sunshine.",
+      "curatorNote": "Minimal, joyful pendant.",
+      "price": 85000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#rajasthan",
+        "#pendant",
+        "#saffron",
+        "#silk"
+      ],
+      "images": [
+        {
+          "url": "/products/p28_thread-cage-pendant.png",
+          "alt": "Thread Cage Pendant — Golden Saffron from Rjasthan",
+          "width": 400,
+          "height": 400
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_028_saffron",
+          "name": "Saffron Gold",
+          "sku": "RAJ-TC-003",
+          "stock": 9,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_029",
+      "slug": "artisan-thread-wrapped-pendant",
+      "name": "Artisan Thread Wrapped Pendant",
+      "origin": "Rjasthan",
+      "description": "Artisan Thread Wrapped Pendant from Rjasthan. Layered coils of fine thread anchored onto hand-turned wooden cores, suspended from a waxed cord.",
+      "story": "Layered coils of fine thread anchored onto hand-turned wooden cores, suspended from a waxed cord.",
+      "curatorNote": "Earth tones of kraft and charcoal.",
+      "price": 95000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#rajasthan",
+        "#wrappedpendant",
+        "#textilejewelry"
+      ],
+      "images": [
+        {
+          "url": "/products/p29_thread-wrapped-pendant.jpeg",
+          "alt": "Artisan Thread Wrapped Pendant from Rjasthan",
+          "width": 960,
+          "height": 1200
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_029_kraft",
+          "name": "Kraft & Stone",
+          "sku": "RAJ-TWP-001",
+          "stock": 10,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_030",
+      "slug": "hand-thrown-ceramic-dinner-plate",
+      "name": "Hand-Thrown Ceramic Dinner Plate",
+      "origin": "Rjasthan",
+      "description": "Hand-Thrown Ceramic Dinner Plate from Rjasthan. Wheel-thrown in an open-air studio near Pushkar using indigenous red clay and matte chalk glaze.",
+      "story": "Wheel-thrown in an open-air studio near Pushkar using indigenous red clay and matte chalk glaze.",
+      "curatorNote": "Organic, gently wavy rim with pleasant heft.",
+      "price": 125000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#rajasthan",
+        "#stoneware",
+        "#pottery",
+        "#tableware"
+      ],
+      "images": [
+        {
+          "url": "/products/p30_ceramic-plate.png",
+          "alt": "Hand-Thrown Ceramic Dinner Plate from Rjasthan",
+          "width": 1200,
+          "height": 1200
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_030_chalk",
+          "name": "Chalk Matte",
+          "sku": "RAJ-CP-001",
+          "stock": 12,
+          "lowStockThreshold": 4
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_031",
+      "slug": "speckled-ceramic-serving-bowl",
+      "name": "Speckled Ceramic Serving Bowl",
+      "origin": "Rjasthan",
+      "description": "Speckled Ceramic Serving Bowl from Rjasthan. High-fired stoneware with naturally occurring iron speckles and an earthy stone-grey reactive glaze.",
+      "story": "High-fired stoneware with naturally occurring iron speckles and an earthy stone-grey reactive glaze.",
+      "curatorNote": "Microwave and dishwasher safe.",
+      "price": 145000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#bowl",
+        "#stoneware",
+        "#speckled"
+      ],
+      "images": [
+        {
+          "url": "/products/p31_ceramic-bowl.jpeg",
+          "alt": "Speckled Ceramic Serving Bowl from Rjasthan",
+          "width": 474,
+          "height": 474
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_031_stone",
+          "name": "Stone Grey",
+          "sku": "RAJ-CB-001",
+          "stock": 8,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_032",
+      "slug": "deep-clay-ceramic-soup-bowl",
+      "name": "Deep Clay Ceramic Soup Bowl",
+      "origin": "Rjasthan",
+      "description": "Deep Clay Ceramic Soup Bowl from Rjasthan. Comforting round contour that fits snug into both hands. Finished in a semi-matte oatmeal glaze.",
+      "story": "Comforting round contour that fits snug into both hands. Finished in a semi-matte oatmeal glaze.",
+      "curatorNote": "Perfect for warm broths and morning grains.",
+      "price": 95000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#soupbowl",
+        "#pottery",
+        "#everyday"
+      ],
+      "images": [
+        {
+          "url": "/products/p32_ceramic-bowl.png",
+          "alt": "Deep Clay Ceramic Soup Bowl from Rjasthan",
+          "width": 640,
+          "height": 640
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_032_oatmeal",
+          "name": "Oatmeal Cream",
+          "sku": "RAJ-CB-002",
+          "stock": 15,
+          "lowStockThreshold": 4
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_033",
+      "slug": "handmade-ceramic-tea-cup",
+      "name": "Handmade Ceramic Tea Cup",
+      "origin": "Rjasthan",
+      "description": "Handmade Ceramic Tea Cup from Rjasthan. Handle-free cup inspired by Japanese chawan and Indian kulhar, preserving heat while feeling grounded in the palm.",
+      "story": "Handle-free cup inspired by Japanese chawan and Indian kulhar, preserving heat while feeling grounded in the palm.",
+      "curatorNote": "Subtle tactile thumb rest indented on the body.",
+      "price": 65000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#cup",
+        "#teaware",
+        "#handmade"
+      ],
+      "images": [
+        {
+          "url": "/products/p33_ceramic-cup.png",
+          "alt": "Handmade Ceramic Tea Cup from Rjasthan",
+          "width": 1470,
+          "height": 980
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_033_natural",
+          "name": "Unglazed Terracotta & White",
+          "sku": "RAJ-CC-001",
+          "stock": 18,
+          "lowStockThreshold": 5
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 7,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_034",
+      "slug": "wheel-thrown-ceramic-water-jug",
+      "name": "Wheel-Thrown Ceramic Water Jug",
+      "origin": "Rjasthan",
+      "description": "Wheel-Thrown Ceramic Water Jug from Rjasthan. Generous 1.2-litre pitcher thrown on the manual kick-wheel with a smooth curved spout for clean, drip-free pouring.",
+      "story": "Generous 1.2-litre pitcher thrown on the manual kick-wheel with a smooth curved spout for clean, drip-free pouring.",
+      "curatorNote": "Centerpiece for dining tables.",
+      "price": 220000,
+      "comparePrice": 260000,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#jug",
+        "#waterpitcher",
+        "#tableware"
+      ],
+      "images": [
+        {
+          "url": "/products/p34_ceramic-jug.jpeg",
+          "alt": "Wheel-Thrown Ceramic Water Jug from Rjasthan",
+          "width": 626,
+          "height": 626
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_034_sand",
+          "name": "Dune Sand",
+          "sku": "RAJ-CJ-001",
+          "stock": 5,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_035",
+      "slug": "jaipur-blue-pottery-ceramic-vase",
+      "name": "Jaipur Blue Pottery Ceramic Vase",
+      "origin": "Jaipur",
+      "description": "Jaipur Blue Pottery Ceramic Vase from Jaipur. Authentic Jaipur blue pottery made with Egyptian paste (quartz powder, Fuller's earth, and natural gum) without clay. Fired at low temperature.",
+      "story": "Authentic Jaipur blue pottery made with Egyptian paste (quartz powder, Fuller's earth, and natural gum) without clay. Fired at low temperature.",
+      "curatorNote": "Vibrant cobalt and Persian turquoise floral arabesques.",
+      "price": 185000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#jaipur",
+        "#bluepottery",
+        "#turquoiseceramic",
+        "#traditional"
+      ],
+      "images": [
+        {
+          "url": "/products/p35_jaipur-blue-pottery-ceramic.jpeg",
+          "alt": "Jaipur Blue Pottery Ceramic Vase from Jaipur",
+          "width": 1639,
+          "height": 1639
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_035_cobalt",
+          "name": "Cobalt Turquoise",
+          "sku": "JAI-BP-001",
+          "stock": 6,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 8,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_036",
+      "slug": "ceramic-serving-platter-tray",
+      "name": "Ceramic Serving Platter Tray",
+      "origin": "Rjasthan",
+      "description": "Ceramic Serving Platter Tray from Rjasthan. Rectangular slab-built tray with gently raised edges, decorated with minimalist brushstroke lines in mineral pigments.",
+      "story": "Rectangular slab-built tray with gently raised edges, decorated with minimalist brushstroke lines in mineral pigments.",
+      "curatorNote": "For cheese, appetizers, or as an entryway catch-all.",
+      "price": 195000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#tray",
+        "#servingplatter",
+        "#artisan"
+      ],
+      "images": [
+        {
+          "url": "/products/p36_ceramic-tray.jpeg",
+          "alt": "Ceramic Serving Platter Tray from Rjasthan",
+          "width": 1000,
+          "height": 1000
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_036_brush",
+          "name": "Mineral Ochre Brush",
+          "sku": "RAJ-CT-001",
+          "stock": 7,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_037",
+      "slug": "jaipur-blue-pottery-trinket-dish",
+      "name": "Jaipur Blue Pottery Trinket Dish",
+      "origin": "Jaipur",
+      "description": "Jaipur Blue Pottery Trinket Dish from Jaipur. Small shallow dish painted with delicate Persian palmettes by master artisans in Kot Jewar, Jaipur.",
+      "story": "Small shallow dish painted with delicate Persian palmettes by master artisans in Kot Jewar, Jaipur.",
+      "curatorNote": "Holds daily rings, crystals, or tea lights.",
+      "price": 85000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#jaipur",
+        "#bluepottery",
+        "#dish",
+        "#trinket"
+      ],
+      "images": [
+        {
+          "url": "/products/p37_jaipur-blue-pottery-ceramic.png",
+          "alt": "Jaipur Blue Pottery Trinket Dish from Jaipur",
+          "width": 406,
+          "height": 334
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_037_azure",
+          "name": "Azure Blue",
+          "sku": "JAI-BP-002",
+          "stock": 14,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_038",
+      "slug": "stoneware-ceramic-coasters-set-of-4",
+      "name": "Stoneware Ceramic Coasters (Set of 4)",
+      "origin": "Rjasthan",
+      "description": "Stoneware Ceramic Coasters (Set of 4) from Rjasthan. Set of four heavy ceramic coasters backed with recycled cork to protect table surfaces.",
+      "story": "Set of four heavy ceramic coasters backed with recycled cork to protect table surfaces.",
+      "curatorNote": "Stack neatly into an earthy pile.",
+      "price": 95000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#coasters",
+        "#stoneware",
+        "#home"
+      ],
+      "images": [
+        {
+          "url": "/products/p38_ceramic-coaster.png",
+          "alt": "Stoneware Ceramic Coasters (Set of 4) from Rjasthan",
+          "width": 1080,
+          "height": 1080
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_038_set",
+          "name": "Earth & Ash Set",
+          "sku": "RAJ-CC-004",
+          "stock": 16,
+          "lowStockThreshold": 4
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_039",
+      "slug": "ceramic-petal-jewellery-bowl",
+      "name": "Ceramic Petal Jewellery Bowl",
+      "origin": "Rjasthan",
+      "description": "Ceramic Petal Jewellery Bowl from Rjasthan. Pinched by hand into a soft blossom silhouette with crackle celadon glaze that pools in the bottom.",
+      "story": "Pinched by hand into a soft blossom silhouette with crackle celadon glaze that pools in the bottom.",
+      "curatorNote": "Delicate jewel for your nightstand.",
+      "price": 75000,
+      "comparePrice": null,
+      "categorySlug": "ceramic",
+      "tags": [
+        "#ceramic",
+        "#jewellerydish",
+        "#petals",
+        "#smallgift"
+      ],
+      "images": [
+        {
+          "url": "/products/p39_ceramic-jewelley-bowl.jpeg",
+          "alt": "Ceramic Petal Jewellery Bowl from Rjasthan",
+          "width": 1428,
+          "height": 1423
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_039_celadon",
+          "name": "Crackle Celadon",
+          "sku": "RAJ-JB-001",
+          "stock": 12,
+          "lowStockThreshold": 3
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_040",
+      "slug": "antique-carved-wooden-jewelry-casket",
+      "name": "Antique Carved Wooden Jewelry Casket",
+      "origin": "Rjasthan",
+      "description": "Antique Carved Wooden Jewelry Casket from Rjasthan. Vintage Sheesham hardwood box with hand-carved floral jali latticework and antique brass hasps, sourced in Jodhpur.",
+      "story": "Vintage Sheesham hardwood box with hand-carved floral jali latticework and antique brass hasps, sourced in Jodhpur.",
+      "curatorNote": "Lined with velvet and carrying decades of character.",
+      "price": 380000,
+      "comparePrice": 450000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#rajasthan",
+        "#sheesham",
+        "#antique",
+        "#jewelrybox",
+        "#brasshardware"
+      ],
+      "images": [
+        {
+          "url": "/products/p40_antigue-wooden-jewelry-casket.jpeg",
+          "alt": "Antique Carved Wooden Jewelry Casket from Rjasthan",
+          "width": 1800,
+          "height": 1800
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_040_vintage",
+          "name": "Dark Walnut Sheesham",
+          "sku": "RAJ-JC-001",
+          "stock": 1,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 9,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_041",
+      "slug": "tribal-silver-filigree-jewellery",
+      "name": "Tribal Silver Filigree Jewellery",
+      "origin": "India",
+      "description": "Tribal Silver Filigree Jewellery from India. Spun silver wires twisted into openwork florets using centuries-old Tarakasi techniques from Cuttack.",
+      "story": "Spun silver wires twisted into openwork florets using centuries-old Tarakasi techniques from Cuttack.",
+      "curatorNote": "Solid sterling 92.5 silver with oxidised finish.",
+      "price": 420000,
+      "comparePrice": null,
+      "categorySlug": "jewelry",
+      "tags": [
+        "#silver",
+        "#filigree",
+        "#tribaljewelry",
+        "#statement"
+      ],
+      "images": [
+        {
+          "url": "/products/p41_silver-jewellery.jpeg",
+          "alt": "Tribal Silver Filigree Jewellery from India",
+          "width": 1154,
+          "height": 1500
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_041_silver",
+          "name": "Oxidised 925 Silver",
+          "sku": "IND-SF-001",
+          "stock": 2,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_042",
+      "slug": "kashmiri-perforated-brass-lamp",
+      "name": "Kashmiri Perforated Brass Lamp",
+      "origin": "Kashmir",
+      "description": "Kashmiri Perforated Brass Lamp from Kashmir. Pierced by hand with thousands of micro-holes that cast mesmerizing constellations of shadow and amber light across room walls.",
+      "story": "Pierced by hand with thousands of micro-holes that cast mesmerizing constellations of shadow and amber light across room walls.",
+      "curatorNote": "Includes warm filament bulb and woven textile cord.",
+      "price": 340000,
+      "comparePrice": 400000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#kashmir",
+        "#lamp",
+        "#brass",
+        "#lighting",
+        "#perforated"
+      ],
+      "images": [
+        {
+          "url": "/products/p42_lamp.jpeg",
+          "alt": "Kashmiri Perforated Brass Lamp from Kashmir",
+          "width": 474,
+          "height": 474
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_042_brass",
+          "name": "Antique Patina Brass",
+          "sku": "KSH-LP-001",
+          "stock": 4,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 10,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_043",
+      "slug": "carved-sandstone-accent-lamp",
+      "name": "Carved Sandstone Accent Lamp",
+      "origin": "Rajasthan",
+      "description": "Carved Sandstone Accent Lamp from Rajasthan. Sculpted from golden Jaisalmer sandstone blocks with geometric geometric cutouts inspired by desert havelis.",
+      "story": "Sculpted from golden Jaisalmer sandstone blocks with geometric geometric cutouts inspired by desert havelis.",
+      "curatorNote": "Heavy, architectural lighting piece.",
+      "price": 280000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#rajasthan",
+        "#sandstone",
+        "#lamp",
+        "#ambient"
+      ],
+      "images": [
+        {
+          "url": "/products/p43_lamp.jpeg",
+          "alt": "Carved Sandstone Accent Lamp from Rajasthan",
+          "width": 500,
+          "height": 500
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_043_sandstone",
+          "name": "Jaisalmer Golden Stone",
+          "sku": "RAJ-LP-002",
+          "stock": 3,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_044",
+      "slug": "heritage-botanical-postcards-set-of-12",
+      "name": "Heritage Botanical Postcards (Set of 12)",
+      "origin": "India",
+      "description": "Heritage Botanical Postcards (Set of 12) from India. Letterpress printed on 350gsm handmade rag card stock, showcasing indigenous flora and trail maps of India.",
+      "story": "Letterpress printed on 350gsm handmade rag card stock, showcasing indigenous flora and trail maps of India.",
+      "curatorNote": "A keepsake to frame or send through the post.",
+      "price": 65000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#postcards",
+        "#stationery",
+        "#botanical",
+        "#letterpress"
+      ],
+      "images": [
+        {
+          "url": "/products/p44_postcards.jpeg",
+          "alt": "Heritage Botanical Postcards (Set of 12) from India",
+          "width": 640,
+          "height": 640
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_044_set",
+          "name": "Boxed Set of 12",
+          "sku": "IND-PC-001",
+          "stock": 25,
+          "lowStockThreshold": 5
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_045",
+      "slug": "curated-regional-story-gift-box",
+      "name": "Curated Regional Story Gift Box",
+      "origin": "India",
+      "description": "Curated Regional Story Gift Box from India. A thoughtful assortment of regional handmade objects — a hand-bound journal, ceramic cup, brass bookmark, and artisan incense.",
+      "story": "A thoughtful assortment of regional handmade objects — a hand-bound journal, ceramic cup, brass bookmark, and artisan incense.",
+      "curatorNote": "Packaged in our signature kraft keepsake box with dried floral sprig.",
+      "price": 360000,
+      "comparePrice": 420000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#giftbox",
+        "#curated",
+        "#storybox",
+        "#taster"
+      ],
+      "images": [
+        {
+          "url": "/products/p45_curated-gift-boxes.jpeg",
+          "alt": "Curated Regional Story Gift Box from India",
+          "width": 1900,
+          "height": 1267
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_045_box",
+          "name": "Curator's Ensemble",
+          "sku": "IND-GB-001",
+          "stock": 8,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 11,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_046",
+      "slug": "hand-knotted-gabba-wool-rug",
+      "name": "Hand-Knotted Gabba Wool Rug",
+      "origin": "Kashmir",
+      "description": "Hand-Knotted Gabba Wool Rug from Kashmir. A Gabba rug (also known as Gabbeh) is a nomadic tribal rug known for its thick plush pile, bold simplicity, and artistic charm. Hand-knotted with coarse mountain wool dyed in earth pigments.",
+      "story": "A Gabba rug (also known as Gabbeh) is a nomadic tribal rug known for its thick plush pile, bold simplicity, and artistic charm. Hand-knotted with coarse mountain wool dyed in earth pigments.",
+      "curatorNote": "Warm, tactile, and exceptionally soft underfoot.",
+      "price": 1450000,
+      "comparePrice": 1800000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#kashmir",
+        "#gabbeh",
+        "#rug",
+        "#handknotted",
+        "#wool",
+        "#tribal"
+      ],
+      "images": [
+        {
+          "url": "/products/p46_gabba-rug.jpeg",
+          "alt": "Hand-Knotted Gabba Wool Rug from Kashmir",
+          "width": 1000,
+          "height": 1000
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_046_earth",
+          "name": "Earth Geometric (4x6 ft)",
+          "sku": "KSH-GB-001",
+          "stock": 1,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": true,
+      "curatedOrder": 12,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_047",
+      "slug": "master-artisan-kashmiri-carpet",
+      "name": "Master Artisan Kashmiri Carpet",
+      "origin": "Kashmir",
+      "description": "Master Artisan Kashmiri Carpet from Kashmir. Hand-knotted with over 400 knots per square inch in Srinagar using fine wool and mulberry silk highlights. Takes eight months to complete.",
+      "story": "Hand-knotted with over 400 knots per square inch in Srinagar using fine wool and mulberry silk highlights. Takes eight months to complete.",
+      "curatorNote": "Investment piece carrying generational heritage.",
+      "price": 2850000,
+      "comparePrice": 3500000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#kashmir",
+        "#carpet",
+        "#silkwool",
+        "#heirloom",
+        "#masterpiece"
+      ],
+      "images": [
+        {
+          "url": "/products/p47_kashmiri-carpet.jpeg",
+          "alt": "Master Artisan Kashmiri Carpet from Kashmir",
+          "width": 1920,
+          "height": 1280
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_047_silkwool",
+          "name": "Midnight Forest (5x7 ft)",
+          "sku": "KSH-CPT-001",
+          "stock": 1,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_048",
+      "slug": "handwoven-bikaneri-cotton-dhurrie",
+      "name": "Handwoven Bikaneri Cotton Dhurrie",
+      "origin": "Rajasthan",
+      "description": "Handwoven Bikaneri Cotton Dhurrie from Rajasthan. Sturdy flatweave floor rug woven on horizontal pit-looms in Bikaner. Reversible geometric patterns in unbleached cotton and mineral dyes.",
+      "story": "Sturdy flatweave floor rug woven on horizontal pit-looms in Bikaner. Reversible geometric patterns in unbleached cotton and mineral dyes.",
+      "curatorNote": "Cool in summer, easy to wash, and reversible.",
+      "price": 450000,
+      "comparePrice": 520000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#rajasthan",
+        "#dhurrie",
+        "#bikaner",
+        "#flatweave",
+        "#cotton"
+      ],
+      "images": [
+        {
+          "url": "/products/p48_bikaneri-rajasthani-dhurrie.jpeg",
+          "alt": "Handwoven Bikaneri Cotton Dhurrie from Rajasthan",
+          "width": 1200,
+          "height": 772
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_048_geo",
+          "name": "Striped Ochre (3x5 ft)",
+          "sku": "RAJ-DH-001",
+          "stock": 5,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_049",
+      "slug": "hand-felted-kashmiri-namda-rug",
+      "name": "Hand-Felted Kashmiri Namda Rug",
+      "origin": "Kashmir",
+      "description": "Hand-Felted Kashmiri Namda Rug from Kashmir. Namda is a hand-felted textile produced in the Kashmir Valley. Entangled wool fibers pressed with soap and water form a dense mattress, then embroidered with vibrant chainstitch.",
+      "story": "Namda is a hand-felted textile produced in the Kashmir Valley. Entangled wool fibers pressed with soap and water form a dense mattress, then embroidered with vibrant chainstitch.",
+      "curatorNote": "Historically placed over stone floors for winter warmth.",
+      "price": 580000,
+      "comparePrice": 680000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#kashmir",
+        "#namda",
+        "#felted",
+        "#woolrug",
+        "#chainstitch"
+      ],
+      "images": [
+        {
+          "url": "/products/p49_namda-rug.png",
+          "alt": "Hand-Felted Kashmiri Namda Rug from Kashmir",
+          "width": 577,
+          "height": 433
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_049_felt",
+          "name": "Floral Medallion (4x4 ft)",
+          "sku": "KSH-NMD-001",
+          "stock": 2,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": true,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_050",
+      "slug": "bhadohi-hand-tufted-wool-carpet",
+      "name": "Bhadohi Hand-Tufted Wool Carpet",
+      "origin": "Uttar Pradesh",
+      "description": "Bhadohi Hand-Tufted Wool Carpet from Uttar Pradesh. Woven in Bhadohi, India's historic 'Carpet City'. 100% New Zealand wool blended with indigenous Bikaner fleece for resilience.",
+      "story": "Woven in Bhadohi, India's historic 'Carpet City'. 100% New Zealand wool blended with indigenous Bikaner fleece for resilience.",
+      "curatorNote": "Lush 15mm pile with subtle stone carved borders.",
+      "price": 1150000,
+      "comparePrice": 1400000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#bhadohi",
+        "#carpet",
+        "#uttarpradesh",
+        "#tuftedwool"
+      ],
+      "images": [
+        {
+          "url": "/products/p50_bhadohi-carpet.jpeg",
+          "alt": "Bhadohi Hand-Tufted Wool Carpet from Uttar Pradesh",
+          "width": 509,
+          "height": 799
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_050_stone",
+          "name": "Stone Oatmeal (4x6 ft)",
+          "sku": "UP-BHD-001",
+          "stock": 3,
+          "lowStockThreshold": 1
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_051",
+      "slug": "mirzapur-persian-inspired-flatweave",
+      "name": "Mirzapur Persian-Inspired Flatweave",
+      "origin": "Uttar Pradesh",
+      "description": "Mirzapur Persian-Inspired Flatweave from Uttar Pradesh. Wool and cotton carpet woven on upright looms in Mirzapur, drawing on 16th-century Persian court motifs.",
+      "story": "Wool and cotton carpet woven on upright looms in Mirzapur, drawing on 16th-century Persian court motifs.",
+      "curatorNote": "Muted vegetable-washed patina.",
+      "price": 890000,
+      "comparePrice": 1050000,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#mirzapur",
+        "#carpet",
+        "#uttarpradesh",
+        "#persianpattern"
+      ],
+      "images": [
+        {
+          "url": "/products/p51_mirzapur-carpet.jpeg",
+          "alt": "Mirzapur Persian-Inspired Flatweave from Uttar Pradesh",
+          "width": 354,
+          "height": 500
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_051_persian",
+          "name": "Muted Rust & Indigo (4x6 ft)",
+          "sku": "UP-MZP-001",
+          "stock": 4,
+          "lowStockThreshold": 2
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    },
+    {
+      "id": "prod_052",
+      "slug": "heirloom-smoked-dried-bamboo-shoots",
+      "name": "Heirloom Smoked Dried Bamboo Shoots",
+      "origin": "Nagaland",
+      "description": "Heirloom Smoked Dried Bamboo Shoots from Nagaland. Dehydrated young bamboo shoots naturally smoked over wood fires in Naga tribal kitchens. Concentrated earthy aroma and savory depth.",
+      "story": "Dehydrated young bamboo shoots naturally smoked over wood fires in Naga tribal kitchens. Concentrated earthy aroma and savory depth.",
+      "curatorNote": "Rehydrate in warm water before adding to stews and braises.",
+      "price": 45000,
+      "comparePrice": null,
+      "categorySlug": "home-decor",
+      "tags": [
+        "#nagaland",
+        "#culinary",
+        "#bambooshoots",
+        "#artisanfood",
+        "#organic"
+      ],
+      "images": [
+        {
+          "url": "/products/p52_dried-bamboo-shoots.jpeg",
+          "alt": "Heirloom Smoked Dried Bamboo Shoots from Nagaland",
+          "width": 1600,
+          "height": 1276
+        }
+      ],
+      "variants": [
+        {
+          "id": "var_052_shoots",
+          "name": "Smoked Pack (250g)",
+          "sku": "NAG-BS-001",
+          "stock": 20,
+          "lowStockThreshold": 5
+        }
+      ],
+      "curated": false,
+      "curatedOrder": null,
+      "visible": true,
+      "oneOfOne": false,
+      "createdAt": "2026-09-19T00:00:00Z"
+    }
+  ]
+}

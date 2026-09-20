@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* ─── Brand Tokens (from brand/tokens/brand-tokens.css) ───────────────────── */
+:root {
+  /* Core */
+  --ink:            #313130;
+  --berry:          #6c0222;
+  --paper:          #ffffff;
+
+  /* Wordmark */
+  --wordmark:       #4e4e4e;
+  --brick:          #ad3d3d;
+  --wordmark-faded: #717171;
+  --se-mauve:       #996171;
+
+  /* Category fruit colours */
+  --berry-deep:     #48010d;
+  --plum:           #57253e;
+  --navy:           #0f1b37;
+  --olive:          #4e5332;
+
+  /* Mockup palette */
+  --kraft:          #c2a18d;
+  --kraft-deep:     #90735b;
+  --mist:           #d0cdd2;
+  --mauve:          #823e55;
+
+  /* Derived: kraft@12% over white */
+  --surface:        #f8f4f1;
+
+  /* Brand motif grey */
+  --motif:          #5d5d5f;
+
+  /* Typography variables — swap Six Hands Marker in here when available */
+  --font-hand:      'Patrick Hand', cursive;
+  --font-label:     'Poppins', sans-serif;
+  --font-body:      'Inter', sans-serif;
+}
+
+/* ─── Tailwind v4 Theme ────────────────────────────────────────────────────── */
+@theme inline {
+  /* Colors */
+  --color-ink:            var(--ink);
+  --color-berry:          var(--berry);
+  --color-paper:          var(--paper);
+  --color-surface:        var(--surface);
+  --color-kraft:          var(--kraft);
+  --color-kraft-deep:     var(--kraft-deep);
+  --color-mist:           var(--mist);
+  --color-mauve:          var(--mauve);
+  --color-brick:          var(--brick);
+  --color-wordmark:       var(--wordmark);
+  --color-wordmark-faded: var(--wordmark-faded);
+  --color-se-mauve:       var(--se-mauve);
+  --color-motif:          var(--motif);
+  --color-berry-deep:     var(--berry-deep);
+  --color-plum:           var(--plum);
+  --color-navy:           var(--navy);
+  --color-olive:          var(--olive);
+
+  /* Fonts */
+  --font-hand:  'Patrick Hand', cursive;
+  --font-label: 'Poppins', sans-serif;
+  --font-body:  'Inter', sans-serif;
+
+  /* Border radius — river stone language */
+  --radius-stone:  12px;
+  --radius-modal:  16px;
+  --radius-hero:   20px;
+  --radius-full:   9999px;
+
+  /* Shadows — brand: no heavy shadows */
+  --shadow-soft: 0 2px 8px rgba(49, 49, 48, 0.06);
+  --shadow-card: 0 1px 4px rgba(49, 49, 48, 0.08);
+
+  /* Border */
+  --border-brand: 1px solid rgba(49, 49, 48, 0.10);
+}
+
+/* ─── Base Styles ──────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography Utilities ─────────────────────────────────────────────────── */
+.font-hand  { font-family: var(--font-hand); }
+.font-label { font-family: var(--font-label); font-weight: 300; letter-spacing: 0.3em; text-transform: uppercase; }
+.font-body  { font-family: var(--font-body); }
+
+/* ─── Focus States (accessible) ────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--berry);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--mist); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--kraft); }
+
+/* ─── Selection ────────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(108, 2, 34, 0.12);
+  color: var(--ink);
+}
+
+/* ─── Reduced Motion ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Utility: Brand Border ─────────────────────────────────────────────────── */
+.border-brand { border: var(--border-brand); }
+
+/* ─── Utility: Aspect ratios ────────────────────────────────────────────────── */
+.aspect-product { aspect-ratio: 4 / 5; }
+
+/* ─── Cart Drawer transition ─────────────────────────────────────────────────── */
+.drawer-overlay {
+  background: rgba(49, 49, 48, 0.45);
+  backdrop-filter: blur(2px);
+}
