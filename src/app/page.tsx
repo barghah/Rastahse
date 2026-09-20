@@ -149,24 +149,24 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
             {/* Motif image */}
             <FadeUp>
-              <div className="relative">
-                <div className="rounded-[20px] bg-surface p-8 flex items-center justify-center">
+              <div className="relative overflow-hidden rounded-[20px]">
+                <div className="rounded-[20px] bg-surface p-6 sm:p-8 flex items-center justify-center max-h-[340px] sm:max-h-none">
                   <Image
                     src="/brand/logos/logo-primary.png"
                     alt="Rastahse stone mark"
                     width={320}
                     height={400}
-                    className="w-full h-auto object-contain opacity-85"
+                    className="w-auto h-[260px] sm:w-full sm:h-auto object-contain opacity-85"
                   />
                 </div>
-                {/* Berry fruit accent */}
-                <div className="absolute -top-4 -right-4 opacity-60">
+                {/* Berry fruit accent — inside the card on mobile, outside on md+ */}
+                <div className="absolute top-3 right-3 sm:-top-4 sm:-right-4 opacity-50 sm:opacity-60 pointer-events-none">
                   <Image
                     src="/brand/motifs/fruit.png"
                     alt=""
-                    width={48}
-                    height={48}
-                    className="object-contain"
+                    width={40}
+                    height={40}
+                    className="object-contain w-8 h-8 sm:w-12 sm:h-12"
                     aria-hidden="true"
                   />
                 </div>

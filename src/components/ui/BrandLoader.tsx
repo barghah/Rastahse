@@ -229,11 +229,22 @@ export function BrandLoader({
     </div>
   );
 
-  // Fullscreen overlay container with subtle paper backdrop blur
+  // Fullscreen overlay container — deep warm dark background matching the intro animation
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-[150] bg-paper/95 backdrop-blur-xs flex items-center justify-center p-4">
-        {content}
+      <div
+        className="fixed inset-0 z-[150] flex items-center justify-center p-4"
+        style={{ backgroundColor: "#1a1410" }}
+      >
+        {/* Warm radial glow behind the mark */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 50% at 50% 55%, rgba(108,2,34,0.15) 0%, transparent 70%)",
+          }}
+        />
+        <div className="relative">{content}</div>
       </div>
     );
   }
