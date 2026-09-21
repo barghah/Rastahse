@@ -1,13 +1,11 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/actions/admin";
 import type { ReactNode } from "react";
 
 /**
  * Admin layout — Server Component auth guard.
- * Checks session AND is_admin on every request.
+ * Checks session AND is_admin on every request (cached via requireAdmin).
  * Styled in Rastah's signature warm paper/cream atelier theme.
  */
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -16,30 +14,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) redirect("/admin/login");
-
-    const admin = await createAdminClient();
-    const { data: profile } = await admin
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile?.is_admin) {
-      // Sign out non-admin user and redirect
-      await supabase.auth.signOut();
-      redirect("/admin/login");
-    }
+    await requireAdmin();
   }
 
   const navLinks = [
     { href: "/admin",           label: "Dashboard", icon: "▦" },
     { href: "/admin/orders",    label: "Orders",    icon: "📦" },
     { href: "/admin/products",  label: "Products",  icon: "🪨" },
-    { href: "/admin/messages",  label: "Messages",  icon: "✉️"  },
+    { href: "/admin/customers", label: "Customers", icon: "👥" },
+    { href: "/admin/messages",  label: "Messages",  icon: "✉️" },
   ];
 
   return (

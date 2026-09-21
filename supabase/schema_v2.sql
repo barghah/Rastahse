@@ -75,8 +75,14 @@ create table if not exists product_overrides (
   price_override        numeric(10, 2),
   description_override  text,
   in_stock              boolean not null default true,
+  is_hidden             boolean not null default false,
+  is_deleted            boolean not null default false,
   updated_at            timestamptz not null default now()
 );
+
+-- Ensure columns exist if table was already created
+alter table product_overrides add column if not exists is_hidden boolean not null default false;
+alter table product_overrides add column if not exists is_deleted boolean not null default false;
 
 alter table product_overrides enable row level security;
 

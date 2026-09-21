@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
     !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
     !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  let stats = { totalOrders: 0, totalRevenue: 0, pendingOrders: 0, unreadMessages: 0 };
+  let stats = { totalOrders: 0, totalRevenue: 0, pendingOrders: 0, unreadMessages: 0, totalCustomers: 0 };
   let recentOrders: Awaited<ReturnType<typeof getAdminOrders>> = [];
 
   if (hasSupabase) {
@@ -28,30 +28,32 @@ export default async function AdminDashboard() {
   }
 
   const statCards = [
-    { label: "Total Orders",      value: stats.totalOrders,                                sub: "all time" },
-    { label: "Revenue",           value: `₹${stats.totalRevenue.toLocaleString("en-IN")}`, sub: "excl. cancelled" },
-    { label: "Pending Orders",    value: stats.pendingOrders,                              sub: "need fulfillment" },
-    { label: "Inquiries",         value: stats.unreadMessages,                             sub: "contact form" },
+    { label: "Total Orders",      value: stats.totalOrders,                                sub: "all time", href: "/admin/orders" },
+    { label: "Revenue",           value: `₹${stats.totalRevenue.toLocaleString("en-IN")}`, sub: "completed orders", href: "/admin/orders" },
+    { label: "Customers",         value: stats.totalCustomers,                             sub: "registered accounts", href: "/admin/customers" },
+    { label: "Pending Orders",    value: stats.pendingOrders,                              sub: "need fulfillment", href: "/admin/orders?status=pending" },
+    { label: "Inquiries",         value: stats.unreadMessages,                             sub: "customer messages", href: "/admin/messages" },
   ];
 
   return (
     <div className="p-6 sm:p-8 space-y-8 max-w-7xl">
       <div>
-        <h1 className="font-label text-2xl text-ink font-medium tracking-tight">Dashboard Overview</h1>
-        <p className="font-body text-xs text-ink/50 mt-1">Manage orders, inventory, and customer messages.</p>
+        <h1 className="font-label text-2xl text-ink font-semibold tracking-tight">Dashboard Overview</h1>
+        <p className="font-body text-xs text-ink/50 mt-1">Manage orders, inventory, customers, and messages.</p>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {statCards.map((card) => (
-          <div
+          <Link
             key={card.label}
-            className="rounded-[18px] p-5 sm:p-6 bg-paper border border-brand shadow-soft"
+            href={card.href}
+            className="rounded-[18px] p-5 bg-paper border border-brand shadow-soft hover:border-berry/30 hover:shadow-md transition-all group block"
           >
-            <p className="font-label text-[10px] text-ink/45 uppercase tracking-wider font-medium">{card.label}</p>
-            <p className="font-label text-2xl sm:text-3xl text-ink font-semibold mt-2.5 tracking-tight">{card.value}</p>
+            <p className="font-label text-[10px] text-ink/45 uppercase tracking-wider font-semibold group-hover:text-berry transition-colors">{card.label}</p>
+            <p className="font-label text-2xl text-ink font-semibold mt-2 tracking-tight">{card.value}</p>
             <p className="font-body text-[11px] text-ink/40 mt-1">{card.sub}</p>
-          </div>
+          </Link>
         ))}
       </div>
 

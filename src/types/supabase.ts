@@ -105,6 +105,8 @@ export interface Database {
           price_override: number | null;
           description_override: string | null;
           in_stock: boolean;
+          is_hidden: boolean;
+          is_deleted: boolean;
           updated_at: string;
         };
         Insert: {
@@ -112,6 +114,8 @@ export interface Database {
           price_override?: number | null;
           description_override?: string | null;
           in_stock?: boolean;
+          is_hidden?: boolean;
+          is_deleted?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -119,6 +123,8 @@ export interface Database {
           price_override?: number | null;
           description_override?: string | null;
           in_stock?: boolean;
+          is_hidden?: boolean;
+          is_deleted?: boolean;
           updated_at?: string;
         };
         Relationships: [];
