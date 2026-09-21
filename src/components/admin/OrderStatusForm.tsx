@@ -31,12 +31,12 @@ export function OrderStatusForm({ orderId, currentStatus, currentTracking }: Pro
     setSuccess(false);
 
     startTransition(async () => {
-      try {
-        await updateOrderStatus(orderId, status, tracking);
+      const res = await updateOrderStatus(orderId, status, tracking);
+      if (!res.success) {
+        setError(res.error || "Failed to update order.");
+      } else {
         setSuccess(true);
         router.refresh();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to update order.");
       }
     });
   }

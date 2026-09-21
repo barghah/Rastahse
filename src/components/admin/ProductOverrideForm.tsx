@@ -54,15 +54,18 @@ export function ProductOverrideForm({ product, override }: Props) {
     e.stopPropagation();
     const nextHidden = !isHidden;
     setIsHidden(nextHidden);
+    setErrorMsg(null);
     setSuccessMsg(nextHidden ? "Product hidden from store" : "Product visible on store");
 
     startTransition(async () => {
-      try {
-        await toggleProductVisibility(product.id, nextHidden);
-        router.refresh();
-      } catch (err) {
+      const res = await toggleProductVisibility(product.id, nextHidden);
+      if (!res.success) {
         setIsHidden(!nextHidden); // rollback
-        setErrorMsg(err instanceof Error ? err.message : "Failed to toggle visibility");
+        setErrorMsg(res.error || "Failed to toggle visibility.");
+      } else if (res.error) {
+        setErrorMsg(res.error); // column missing notice
+      } else {
+        router.refresh();
       }
     });
   }
@@ -72,15 +75,16 @@ export function ProductOverrideForm({ product, override }: Props) {
     e.stopPropagation();
     const nextStock = !inStock;
     setInStock(nextStock);
+    setErrorMsg(null);
     setSuccessMsg(nextStock ? "Marked as In Stock" : "Marked as Out of Stock");
 
     startTransition(async () => {
-      try {
-        await toggleProductStock(product.id, nextStock);
-        router.refresh();
-      } catch (err) {
+      const res = await toggleProductStock(product.id, nextStock);
+      if (!res.success) {
         setInStock(!nextStock); // rollback
-        setErrorMsg(err instanceof Error ? err.message : "Failed to toggle stock");
+        setErrorMsg(res.error || "Failed to toggle stock.");
+      } else {
+        router.refresh();
       }
     });
   }
@@ -96,16 +100,19 @@ export function ProductOverrideForm({ product, override }: Props) {
     setConfirmDelete(false);
     setIsDeleted(true);
     setIsHidden(true);
+    setErrorMsg(null);
     setSuccessMsg("Product moved to archive");
 
     startTransition(async () => {
-      try {
-        await deleteProduct(product.id);
-        router.refresh();
-      } catch (err) {
+      const res = await deleteProduct(product.id);
+      if (!res.success) {
         setIsDeleted(false);
         setIsHidden(false);
-        setErrorMsg(err instanceof Error ? err.message : "Failed to delete product");
+        setErrorMsg(res.error || "Failed to delete product.");
+      } else if (res.error) {
+        setErrorMsg(res.error);
+      } else {
+        router.refresh();
       }
     });
   }
@@ -115,16 +122,19 @@ export function ProductOverrideForm({ product, override }: Props) {
     e.stopPropagation();
     setIsDeleted(false);
     setIsHidden(false);
+    setErrorMsg(null);
     setSuccessMsg("Product restored to active catalog");
 
     startTransition(async () => {
-      try {
-        await restoreProduct(product.id);
-        router.refresh();
-      } catch (err) {
+      const res = await restoreProduct(product.id);
+      if (!res.success) {
         setIsDeleted(true);
         setIsHidden(true);
-        setErrorMsg(err instanceof Error ? err.message : "Failed to restore product");
+        setErrorMsg(res.error || "Failed to restore product.");
+      } else if (res.error) {
+        setErrorMsg(res.error);
+      } else {
+        router.refresh();
       }
     });
   }
@@ -142,18 +152,23 @@ export function ProductOverrideForm({ product, override }: Props) {
     }
 
     startTransition(async () => {
-      try {
-        await upsertProductOverride(product.id, {
-          price_override: price,
-          description_override: description || undefined,
-          in_stock: inStock,
-          is_hidden: isHidden,
-          is_deleted: isDeleted,
-        });
-        setSuccessMsg("Saved changes successfully");
+      const res = await upsertProductOverride(product.id, {
+        price_override: price,
+        description_override: description || undefined,
+        in_stock: inStock,
+        is_hidden: isHidden,
+        is_deleted: isDeleted,
+      });
+
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to save overrides.");
+      } else {
+        if (res.error) {
+          setErrorMsg(res.error);
+        } else {
+          setSuccessMsg("Saved changes successfully");
+        }
         router.refresh();
-      } catch (err) {
-        setErrorMsg(err instanceof Error ? err.message : "Failed to save overrides.");
       }
     });
   }

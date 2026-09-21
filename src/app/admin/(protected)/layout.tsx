@@ -56,6 +56,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <Link
               key={link.href}
               href={link.href}
+              prefetch={true}
               className="flex items-center gap-3 px-3.5 py-2.5 rounded-[12px] font-label text-[11.5px] text-ink/70 hover:text-berry hover:bg-surface transition-all duration-150 font-medium"
             >
               <span className="text-base leading-none text-ink/40">{link.icon}</span>
