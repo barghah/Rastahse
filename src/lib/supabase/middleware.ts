@@ -1,7 +1,8 @@
 /**
  * lib/supabase/middleware.ts
- * Supabase session refresh middleware helper.
- * Call this inside your Next.js middleware.ts to keep sessions alive.
+ * Supabase session refresh + route protection middleware helper.
+ * - /account         → requires any logged-in user
+ * - /admin/*         → requires logged-in user with is_admin = true
  * Gracefully no-ops when NEXT_PUBLIC_SUPABASE_URL is not configured.
  */
 import { createServerClient } from "@supabase/ssr";
@@ -9,6 +10,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/supabase";
 
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
   // Skip if Supabase is not configured yet (e.g. local dev without .env.local)
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -19,7 +22,7 @@ export async function updateSession(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request });
 
-  createServerClient<Database>(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
@@ -39,6 +42,25 @@ export async function updateSession(request: NextRequest) {
       },
     }
   );
+
+  // Refresh session (keep tokens alive)
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // ── Protect /account — must be logged in ──────────────────────────────────
+  if (pathname === "/account" && !user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/auth/login";
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // ── Protect /admin/* — must be logged in ─────────────────────────────────
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    if (!user) {
+      const adminLoginUrl = request.nextUrl.clone();
+      adminLoginUrl.pathname = "/admin/login";
+      return NextResponse.redirect(adminLoginUrl);
+    }
+  }
 
   return supabaseResponse;
 }

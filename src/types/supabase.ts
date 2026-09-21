@@ -74,6 +74,56 @@ export interface Database {
         Relationships: [];
       };
 
+      profiles: {
+        Row: {
+          id: string;
+          created_at: string;
+          display_name: string | null;
+          phone: string | null;
+          is_admin: boolean;
+        };
+        Insert: {
+          id: string;
+          created_at?: string;
+          display_name?: string | null;
+          phone?: string | null;
+          is_admin?: boolean;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          display_name?: string | null;
+          phone?: string | null;
+          is_admin?: boolean;
+        };
+        Relationships: [];
+      };
+
+      product_overrides: {
+        Row: {
+          product_id: string;
+          price_override: number | null;
+          description_override: string | null;
+          in_stock: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          product_id: string;
+          price_override?: number | null;
+          description_override?: string | null;
+          in_stock?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          product_id?: string;
+          price_override?: number | null;
+          description_override?: string | null;
+          in_stock?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
       wishlists: {
         Row: {
           id: string;
@@ -142,3 +192,5 @@ export interface Database {
 export type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 export type WishlistRow = Database["public"]["Tables"]["wishlists"]["Row"];
 export type ContactMessageRow = Database["public"]["Tables"]["contact_messages"]["Row"];
+export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+export type ProductOverrideRow = Database["public"]["Tables"]["product_overrides"]["Row"];
