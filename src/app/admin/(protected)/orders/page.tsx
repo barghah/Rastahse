@@ -25,9 +25,9 @@ export default async function AdminOrdersPage({
   const orders = hasSupabase ? await getAdminOrders(statusFilter === "all" ? undefined : statusFilter) : [];
 
   return (
-    <div className="p-6 sm:p-8 space-y-6 max-w-7xl">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl">
       <div>
-        <h1 className="font-label text-2xl text-ink font-medium tracking-tight">Orders Management</h1>
+        <h1 className="font-label text-xl sm:text-2xl text-ink font-semibold tracking-tight">Orders Management</h1>
         <p className="font-body text-xs text-ink/50 mt-1">
           {orders.length} order{orders.length !== 1 ? "s" : ""} {statusFilter !== "all" ? `· ${statusFilter}` : ""}
         </p>

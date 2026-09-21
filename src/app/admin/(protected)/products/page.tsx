@@ -8,9 +8,9 @@ export default async function AdminProductsPage() {
   const overrides = hasSupabase ? await getProductOverrides() : {};
 
   return (
-    <div className="p-6 sm:p-8 space-y-6 max-w-7xl">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl">
       <div>
-        <h1 className="font-label text-2xl text-ink font-semibold tracking-tight">
+        <h1 className="font-label text-xl sm:text-2xl text-ink font-semibold tracking-tight">
           Products & Inventory
         </h1>
         <p className="font-body text-xs text-ink/50 mt-1">

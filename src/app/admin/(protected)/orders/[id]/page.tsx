@@ -29,7 +29,7 @@ export default async function AdminOrderDetailPage({
   const items = Array.isArray(order.items) ? order.items : [];
 
   return (
-    <div className="p-6 sm:p-8 space-y-8 max-w-4xl">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-4xl">
       {/* Back navigation */}
       <Link href="/admin/orders" className="inline-flex items-center gap-1 font-label text-[10.5px] text-ink/50 hover:text-berry transition-colors uppercase tracking-wider font-medium">
         ← Back to All Orders
