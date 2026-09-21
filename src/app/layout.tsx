@@ -66,6 +66,17 @@ export default function RootLayout({
       className={`${patrickHand.variable} ${poppins.variable} ${inter.variable}`}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (window.location.pathname === '/' && !sessionStorage.getItem('rastah_intro_seen')) {
+                  document.documentElement.classList.add('intro-pending');
+                }
+              } catch(e) {}
+            `,
+          }}
+        />
         {/* Override font variables with loaded fonts */}
         <style>{`
           :root {
@@ -73,36 +84,19 @@ export default function RootLayout({
             --font-label: var(--font-label-loaded), 'Poppins', sans-serif;
             --font-body: var(--font-body-loaded), 'Inter', sans-serif;
           }
+          html.intro-pending body {
+            overflow: hidden;
+            background-color: #f8f4f1;
+          }
+          html.intro-pending #site-main-content {
+            opacity: 0;
+          }
         `}</style>
       </head>
       <body className="min-h-screen flex flex-col antialiased">
-        {/* Synchronous SSR veil: prevents any 1st-glance flash of the homepage before hydration */}
-        <div
-          id="rastah-static-curtain"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9998,
-            backgroundColor: "#f8f4f1",
-            pointerEvents: "none",
-          }}
-        >
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                try {
-                  if (window.location.pathname !== '/' || sessionStorage.getItem('rastah_intro_seen')) {
-                    var el = document.getElementById('rastah-static-curtain');
-                    if (el) el.style.display = 'none';
-                  }
-                } catch(e) {}
-              `,
-            }}
-          />
-        </div>
         <IntroAnimation />
         <Header />
-        <main className="flex-1 pt-16 md:pt-20">
+        <main id="site-main-content" className="flex-1 pt-16 md:pt-20">
           {children}
         </main>
         <Footer />

@@ -25,38 +25,32 @@ export function IntroAnimation() {
   useEffect(() => {
     // Only play on the homepage ("/")
     if (pathname !== "/") {
-      const curtain = document.getElementById("rastah-static-curtain");
-      if (curtain) curtain.remove();
+      document.documentElement.classList.remove("intro-pending");
       return;
     }
 
     // Check if user prefers reduced motion
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) {
-      const curtain = document.getElementById("rastah-static-curtain");
-      if (curtain) curtain.remove();
+      document.documentElement.classList.remove("intro-pending");
       return;
     }
 
     // Check if intro was already seen this session
     if (sessionStorage.getItem("rastah_intro_seen")) {
-      const curtain = document.getElementById("rastah-static-curtain");
-      if (curtain) curtain.remove();
+      document.documentElement.classList.remove("intro-pending");
       return;
     }
 
     // Mark as seen so internal navigation doesn't replay
     sessionStorage.setItem("rastah_intro_seen", "1");
 
-    // Remove static veil once React hydration takes over
-    const curtain = document.getElementById("rastah-static-curtain");
-    if (curtain) curtain.remove();
-
     // Activate interactive Framer Motion animation
     setPhase("active");
 
     // Hold for ~1.85s then start architectural curtain wipe exit
     timerRef.current = setTimeout(() => {
+      document.documentElement.classList.remove("intro-pending");
       setPhase("exit");
     }, 1850);
 
@@ -69,6 +63,7 @@ export function IntroAnimation() {
 
   const dismiss = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    document.documentElement.classList.remove("intro-pending");
     setPhase("exit");
   };
 
