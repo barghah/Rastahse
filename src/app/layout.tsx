@@ -76,6 +76,29 @@ export default function RootLayout({
         `}</style>
       </head>
       <body className="min-h-screen flex flex-col antialiased">
+        {/* Synchronous SSR veil: prevents any 1st-glance flash of the homepage before hydration */}
+        <div
+          id="rastah-static-curtain"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9998,
+            backgroundColor: "#f8f4f1",
+          }}
+        >
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  if (sessionStorage.getItem('rastah_intro_seen')) {
+                    var el = document.getElementById('rastah-static-curtain');
+                    if (el) el.style.display = 'none';
+                  }
+                } catch(e) {}
+              `,
+            }}
+          />
+        </div>
         <IntroAnimation />
         <Header />
         <main className="flex-1 pt-16 md:pt-20">

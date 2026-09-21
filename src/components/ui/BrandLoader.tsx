@@ -25,7 +25,7 @@ export function BrandLoader({
   className = "",
   light = false,
   showWordmark = true,
-  showPathHairline = true,
+  showPathHairline = false,
 }: BrandLoaderProps) {
   // --- Micro / Inline variant (for CTA buttons, compact badges, ~18-22px) ---
   if (size === "sm") {
@@ -87,18 +87,11 @@ export function BrandLoader({
     );
   }
 
-  // --- Proportions for Medium, Large, and Fullscreen variants ---
+  // Proportions for Medium, Large, and Fullscreen variants
   const isFullscreen = size === "fullscreen";
   const isLarge = size === "lg" || isFullscreen;
 
-  // Cairn container dimensions
-  const containerW = isLarge ? 88 : 56;
-  const containerH = isLarge ? 104 : 70;
-  const stoneW = isLarge ? 70 : 44;
-  const berryW = isLarge ? 30 : 19;
-  const berryLeftOffset = isLarge ? -15 : -9.5;
-  const berryTop = isLarge ? -14 : -9;
-  const shadowW = isLarge ? 52 : 34;
+  const emblemW = isLarge ? 72 : 46;
 
   const content = (
     <div
@@ -106,80 +99,33 @@ export function BrandLoader({
       role="status"
       aria-label={text || "Loading content"}
     >
-      {/* The Cairn: River-carved stone + Hovering balanced berry */}
-      <div
-        className="relative flex items-center justify-center"
-        style={{ width: containerW, height: containerH }}
+      {/* The Intact River Stone & Crimson Berry Emblem */}
+      <motion.div
+        animate={{
+          y: [0, -3.5, 0],
+          scale: [1, 1.02, 1],
+        }}
+        transition={{
+          duration: 2.6,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="relative flex items-center justify-center pointer-events-none"
+        style={{ width: emblemW }}
       >
-        {/* River-carved foundation stone */}
-        <div
-          className="absolute bottom-2 flex items-center justify-center pointer-events-none"
-          style={{ width: stoneW }}
-        >
-          <Image
-            src={
-              light
-                ? "/brand/logos/stone-clean-white.png"
-                : "/brand/logos/stone-clean.png"
-            }
-            alt="Rastah river stone"
-            width={432}
-            height={505}
-            className="w-full h-auto object-contain"
-            priority
-          />
-        </div>
-
-        {/* Crowned wild berry with meditative levitation */}
-        <motion.div
-          animate={{
-            y: [0, -5, 0],
-            scale: [1, 1.04, 1],
-          }}
-          transition={{
-            duration: 2.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute z-10 pointer-events-none"
-          style={{
-            top: berryTop,
-            left: "50%",
-            marginLeft: berryLeftOffset,
-            width: berryW,
-          }}
-        >
-          <Image
-            src="/brand/motifs/fruit-clean.png"
-            alt="Rastah berry"
-            width={162}
-            height={205}
-            className="w-full h-auto object-contain drop-shadow-xs"
-            priority
-          />
-        </motion.div>
-
-        {/* Ground shadow responding to breathing cairn */}
-        <motion.div
-          animate={{
-            scaleX: [1, 0.92, 1],
-            opacity: [0.65, 0.35, 0.65],
-          }}
-          transition={{
-            duration: 2.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute bottom-0 rounded-full pointer-events-none"
-          style={{
-            width: shadowW,
-            height: isLarge ? 6 : 4,
-            background: light
-              ? "radial-gradient(ellipse at center, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 70%)"
-              : "radial-gradient(ellipse at center, rgba(49,49,48,0.18) 0%, rgba(49,49,48,0) 70%)",
-          }}
+        <Image
+          src={
+            light
+              ? "/brand/logos/emblem-intact-white.png"
+              : "/brand/logos/emblem-intact.png"
+          }
+          alt="Rastah emblem"
+          width={433}
+          height={808}
+          className="w-full h-auto object-contain drop-shadow-xs"
+          priority
         />
-      </div>
+      </motion.div>
 
       {/* Brand Wordmark & Philosophy */}
       {showWordmark && (
