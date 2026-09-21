@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
@@ -17,14 +18,21 @@ import Image from "next/image";
  */
 
 export function IntroAnimation() {
+  const pathname = usePathname();
   const [phase, setPhase] = useState<"idle" | "active" | "exit">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // Only play on the homepage ("/")
+    if (pathname !== "/") {
+      const curtain = document.getElementById("rastah-static-curtain");
+      if (curtain) curtain.remove();
+      return;
+    }
+
     // Check if user prefers reduced motion
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) {
-      // Remove static curtain immediately
       const curtain = document.getElementById("rastah-static-curtain");
       if (curtain) curtain.remove();
       return;
@@ -55,7 +63,9 @@ export function IntroAnimation() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, []);
+  }, [pathname]);
+
+  if (pathname !== "/") return null;
 
   const dismiss = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -67,14 +77,22 @@ export function IntroAnimation() {
       {phase !== "idle" && (
         <motion.div
           key="intro-screen"
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden cursor-pointer select-none"
-          style={{ backgroundColor: "#f8f4f1" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden select-none"
+          style={{
+            backgroundColor: "#f8f4f1",
+            pointerEvents: phase === "active" ? "auto" : "none",
+          }}
           initial={{ y: 0 }}
           animate={phase === "active" ? { y: 0 } : { y: "-100%" }}
           exit={{ y: "-100%" }}
           transition={{
             duration: 0.65,
             ease: [0.76, 0, 0.24, 1], // Luxury architectural shutter easing
+          }}
+          onAnimationComplete={() => {
+            if (phase === "exit") {
+              setPhase("idle");
+            }
           }}
           onClick={dismiss}
           onKeyDown={(e) => (e.key === "Escape" || e.key === "Enter") && dismiss()}

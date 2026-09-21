@@ -84,13 +84,14 @@ export default function RootLayout({
             inset: 0,
             zIndex: 9998,
             backgroundColor: "#f8f4f1",
+            pointerEvents: "none",
           }}
         >
           <script
             dangerouslySetInnerHTML={{
               __html: `
                 try {
-                  if (sessionStorage.getItem('rastah_intro_seen')) {
+                  if (window.location.pathname !== '/' || sessionStorage.getItem('rastah_intro_seen')) {
                     var el = document.getElementById('rastah-static-curtain');
                     if (el) el.style.display = 'none';
                   }

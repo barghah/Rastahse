@@ -99,6 +99,10 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "rastah-cart",
+      partialize: (state) => ({ items: state.items }),
+      onRehydrateStorage: () => (state) => {
+        if (state) state.isOpen = false;
+      },
     }
   )
 );

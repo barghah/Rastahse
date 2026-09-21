@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,8 +9,13 @@ import { formatPrice } from "@/types/product";
 import { Button } from "@/components/ui/Button";
 
 export function CartDrawer() {
+  const [mounted, setMounted] = useState(false);
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice } = useCartStore();
   const drawerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on Escape
   useEffect(() => {
@@ -28,6 +33,8 @@ export function CartDrawer() {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
+
+  if (!mounted) return null;
 
   const total = totalPrice();
   const hasItems = items.length > 0;
