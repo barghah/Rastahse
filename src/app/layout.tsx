@@ -88,6 +88,9 @@ export default function RootLayout({
             overflow: hidden;
             background-color: #f8f4f1;
           }
+          #site-main-content {
+            transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+          }
           html.intro-pending #site-main-content {
             opacity: 0;
           }

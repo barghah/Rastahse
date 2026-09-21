@@ -1,14 +1,21 @@
+import { BrandLoader } from "@/components/ui/BrandLoader";
+
 export default function ProductsLoading() {
   return (
-    <div className="p-6 sm:p-8 space-y-6 max-w-7xl animate-pulse">
-      {/* Header skeleton */}
-      <div className="space-y-2">
-        <div className="h-7 w-56 bg-ink/10 rounded-lg" />
-        <div className="h-4 w-64 bg-ink/5 rounded-md" />
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl">
+      {/* Header with pulsing logo */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-2 animate-pulse">
+          <div className="h-7 w-56 bg-ink/10 rounded-lg" />
+          <div className="h-4 w-64 bg-ink/5 rounded-md" />
+        </div>
+        <div className="shrink-0 flex items-center justify-center">
+          <BrandLoader size="sm" text="Syncing products…" />
+        </div>
       </div>
 
       {/* Search & Filter Bar skeleton */}
-      <div className="bg-paper p-5 rounded-[20px] border border-brand shadow-soft space-y-4">
+      <div className="bg-paper p-5 rounded-[20px] border border-brand shadow-soft space-y-4 animate-pulse">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="h-10 flex-1 bg-surface rounded-[12px]" />
           <div className="h-10 w-48 bg-surface rounded-[12px]" />
@@ -21,7 +28,7 @@ export default function ProductsLoading() {
       </div>
 
       {/* Product Cards skeleton */}
-      <div className="space-y-3">
+      <div className="space-y-3 animate-pulse">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}

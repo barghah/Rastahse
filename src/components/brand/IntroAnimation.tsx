@@ -77,12 +77,16 @@ export function IntroAnimation() {
             backgroundColor: "#f8f4f1",
             pointerEvents: phase === "active" ? "auto" : "none",
           }}
-          initial={{ y: 0 }}
-          animate={phase === "active" ? { y: 0 } : { y: "-100%" }}
-          exit={{ y: "-100%" }}
+          initial={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          animate={
+            phase === "active"
+              ? { opacity: 1, scale: 1, filter: "blur(0px)" }
+              : { opacity: 0, scale: 1.04, filter: "blur(6px)" }
+          }
+          exit={{ opacity: 0, scale: 1.04, filter: "blur(6px)" }}
           transition={{
-            duration: 0.65,
-            ease: [0.76, 0, 0.24, 1], // Luxury architectural shutter easing
+            duration: 0.85,
+            ease: [0.16, 1, 0.3, 1], // Smooth organic blend-in dissolve
           }}
           onAnimationComplete={() => {
             if (phase === "exit") {

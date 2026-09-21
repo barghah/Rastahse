@@ -1,14 +1,15 @@
+import { BrandLoader } from "@/components/ui/BrandLoader";
+
 export default function AdminLoading() {
   return (
-    <div className="p-6 sm:p-8 space-y-6 max-w-7xl animate-pulse">
-      {/* Header skeleton */}
-      <div className="space-y-2">
-        <div className="h-7 w-48 bg-ink/10 rounded-lg" />
-        <div className="h-4 w-72 bg-ink/5 rounded-md" />
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl">
+      {/* Centered Pulsing Logo */}
+      <div className="flex flex-col items-center justify-center py-8">
+        <BrandLoader size="md" showWordmark={true} text="Syncing atelier archive…" />
       </div>
 
       {/* Metric / Filter cards skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
@@ -20,8 +21,8 @@ export default function AdminLoading() {
         ))}
       </div>
 
-      {/* Content table / list skeleton */}
-      <div className="rounded-[18px] bg-paper border border-brand p-6 shadow-soft space-y-4">
+      {/* Content table skeleton */}
+      <div className="rounded-[18px] bg-paper border border-brand p-6 shadow-soft space-y-4 animate-pulse">
         <div className="h-10 w-full bg-surface rounded-[12px]" />
         {[1, 2, 3, 4, 5].map((i) => (
           <div

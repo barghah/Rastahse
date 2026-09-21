@@ -37,18 +37,29 @@ export function BrandLoader({
       >
         {/* Minimal 3-element trail cairn: crowning berry + balanced stone + foundation river stone */}
         <div className="relative w-4 h-5 flex flex-col items-center justify-center shrink-0">
-          {/* Berry with gentle breathing hover */}
+          {/* Berry with rhythmic pulse and glow */}
           <motion.span
             animate={{
-              y: [-1.5, 0.5, -1.5],
-              scale: [0.95, 1.05, 0.95],
+              scale: [1, 1.3, 1],
+              opacity: [0.85, 1, 0.85],
+              boxShadow: light
+                ? [
+                    "0 0 0px rgba(255,255,255,0)",
+                    "0 0 8px rgba(255,255,255,0.7)",
+                    "0 0 0px rgba(255,255,255,0)",
+                  ]
+                : [
+                    "0 0 0px rgba(108,2,34,0)",
+                    "0 0 8px rgba(108,2,34,0.6)",
+                    "0 0 0px rgba(108,2,34,0)",
+                  ],
             }}
             transition={{
-              duration: 1.6,
+              duration: 1.4,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className={`w-1.5 h-1.5 rounded-full block ${
+            className={`w-2 h-2 rounded-full block ${
               light ? "bg-[#fecdd3]" : "bg-berry"
             }`}
           />
@@ -58,7 +69,7 @@ export function BrandLoader({
               scaleX: [0.96, 1.04, 0.96],
             }}
             transition={{
-              duration: 1.6,
+              duration: 1.4,
               repeat: Infinity,
               ease: "easeInOut",
             }}
@@ -91,7 +102,7 @@ export function BrandLoader({
   const isFullscreen = size === "fullscreen";
   const isLarge = size === "lg" || isFullscreen;
 
-  const emblemW = isLarge ? 72 : 46;
+  const emblemW = isLarge ? 72 : 48;
 
   const content = (
     <div
@@ -99,33 +110,65 @@ export function BrandLoader({
       role="status"
       aria-label={text || "Loading content"}
     >
-      {/* The Intact River Stone & Crimson Berry Emblem */}
-      <motion.div
-        animate={{
-          y: [0, -3.5, 0],
-          scale: [1, 1.02, 1],
-        }}
-        transition={{
-          duration: 2.6,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="relative flex items-center justify-center pointer-events-none"
-        style={{ width: emblemW }}
-      >
-        <Image
-          src={
-            light
-              ? "/brand/logos/emblem-intact-white.png"
-              : "/brand/logos/emblem-intact.png"
-          }
-          alt="Rastah emblem"
-          width={433}
-          height={808}
-          className="w-full h-auto object-contain drop-shadow-xs"
-          priority
+      {/* The Intact River Stone & Crimson Berry Emblem with Ambient Pulse Halo */}
+      <div className="relative flex items-center justify-center pointer-events-none" style={{ width: emblemW }}>
+        {/* Breathing ambient pulse halo */}
+        <motion.div
+          className="absolute inset-0 rounded-full -z-10"
+          animate={{
+            scale: [0.9, 1.45, 0.9],
+            opacity: [0.15, 0.5, 0.15],
+          }}
+          transition={{
+            duration: 2.1,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          style={{
+            background: light
+              ? "radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)"
+              : "radial-gradient(circle, rgba(108,2,34,0.28) 0%, rgba(194,161,141,0.18) 50%, transparent 75%)",
+          }}
         />
-      </motion.div>
+
+        {/* Emblem with rhythmic pulse */}
+        <motion.div
+          animate={{
+            y: [0, -3, 0],
+            scale: [1, 1.08, 0.99, 1],
+            filter: light
+              ? [
+                  "drop-shadow(0 0 0px rgba(255,255,255,0))",
+                  "drop-shadow(0 0 14px rgba(255,255,255,0.6))",
+                  "drop-shadow(0 0 0px rgba(255,255,255,0))",
+                ]
+              : [
+                  "drop-shadow(0 2px 4px rgba(108,2,34,0.06))",
+                  "drop-shadow(0 6px 18px rgba(108,2,34,0.32))",
+                  "drop-shadow(0 2px 4px rgba(108,2,34,0.06))",
+                ],
+          }}
+          transition={{
+            duration: 2.1,
+            repeat: Infinity,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+          className="w-full h-auto flex items-center justify-center"
+        >
+          <Image
+            src={
+              light
+                ? "/brand/logos/emblem-intact-white.png"
+                : "/brand/logos/emblem-intact.png"
+            }
+            alt="Rastah emblem"
+            width={433}
+            height={808}
+            className="w-full h-auto object-contain"
+            priority
+          />
+        </motion.div>
+      </div>
 
       {/* Brand Wordmark & Philosophy */}
       {showWordmark && (
