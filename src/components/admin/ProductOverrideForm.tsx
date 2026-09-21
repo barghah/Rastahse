@@ -68,49 +68,49 @@ export function ProductOverrideForm({ product, override }: Props) {
 
   return (
     <div
-      className="rounded-[14px] border overflow-hidden"
-      style={{ borderColor: open ? "rgba(108,2,34,0.4)" : "rgba(255,255,255,0.07)" }}
+      className={`rounded-[16px] border bg-paper shadow-soft overflow-hidden transition-colors ${
+        open ? "border-berry/40" : "border-brand"
+      }`}
     >
       {/* Header row — click to expand */}
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
-        style={{ backgroundColor: "#1c1917" }}
+        className="w-full flex items-center gap-4 px-5 py-4 text-left bg-paper hover:bg-surface/50 transition-colors"
       >
         {/* Thumbnail */}
-        <div className="w-10 h-10 rounded-[8px] bg-white/5 overflow-hidden shrink-0 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-[10px] bg-surface overflow-hidden shrink-0 flex items-center justify-center border border-brand/60">
           {product.images?.[0]?.url ? (
             <Image
               src={product.images[0].url}
               alt=""
-              width={40}
-              height={40}
+              width={48}
+              height={48}
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-white/20 text-xs">—</span>
+            <span className="text-ink/30 text-xs">—</span>
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="font-body text-sm text-white/80 truncate">{product.name}</p>
-          <p className="font-label text-[10px] text-white/30 mt-0.5">
+          <p className="font-body text-sm text-ink font-medium truncate">{product.name}</p>
+          <p className="font-label text-[11px] text-ink/50 mt-0.5">
             ₹{product.price.toLocaleString("en-IN")}
             {override?.price_override !== undefined && (
-              <span className="text-berry ml-2">→ ₹{override.price_override.toLocaleString("en-IN")}</span>
+              <span className="text-berry ml-2 font-semibold">→ ₹{override.price_override.toLocaleString("en-IN")}</span>
             )}
-            {!inStock && <span className="text-red-400 ml-2">· Out of stock</span>}
+            {!inStock && <span className="text-red-600 ml-2 font-medium">· Out of stock</span>}
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {hasOverride && (
-            <span className="px-2 py-0.5 rounded-full bg-berry/20 text-berry font-label text-[9px] uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full bg-berry/10 border border-berry/20 text-berry font-label text-[9.5px] uppercase tracking-wider font-semibold">
               Overridden
             </span>
           )}
-          <span className="text-white/25 text-xs">{open ? "▲" : "▼"}</span>
+          <span className="text-ink/40 text-xs font-mono">{open ? "▲" : "▼"}</span>
         </div>
       </button>
 
@@ -118,14 +118,13 @@ export function ProductOverrideForm({ product, override }: Props) {
       {open && (
         <form
           onSubmit={handleSave}
-          className="px-5 pb-5 pt-1 space-y-4 border-t"
-          style={{ borderColor: "rgba(255,255,255,0.06)", backgroundColor: "#161412" }}
+          className="px-6 pb-6 pt-2 space-y-4 border-t border-brand bg-surface/30"
         >
           <div className="grid sm:grid-cols-2 gap-4 pt-3">
             {/* Price override */}
             <div>
-              <label className="font-label text-[10px] text-white/35 uppercase tracking-wider block mb-1.5">
-                Price Override (₹) <span className="text-white/20 normal-case">· leave blank to use original</span>
+              <label className="font-label text-[10px] text-ink/60 uppercase tracking-wider block mb-1.5 font-medium">
+                Price Override (₹) <span className="text-ink/35 normal-case font-normal">· leave blank to use original</span>
               </label>
               <input
                 type="number"
@@ -134,13 +133,13 @@ export function ProductOverrideForm({ product, override }: Props) {
                 placeholder={`Original: ₹${product.price}`}
                 value={priceStr}
                 onChange={(e) => setPriceStr(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-[10px] font-body text-sm text-white/80 bg-white/5 border border-white/10 outline-none focus:border-white/25 placeholder:text-white/20 transition-colors"
+                className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-paper border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all"
               />
             </div>
 
             {/* Stock toggle */}
             <div>
-              <label className="font-label text-[10px] text-white/35 uppercase tracking-wider block mb-1.5">
+              <label className="font-label text-[10px] text-ink/60 uppercase tracking-wider block mb-1.5 font-medium">
                 Stock Status
               </label>
               <div className="flex gap-3 pt-1">
@@ -149,12 +148,12 @@ export function ProductOverrideForm({ product, override }: Props) {
                     key={String(val)}
                     type="button"
                     onClick={() => setInStock(val)}
-                    className={`px-4 py-2 rounded-[8px] font-label text-[10px] uppercase tracking-wider transition-all ${
+                    className={`px-4 py-2 rounded-[8px] font-label text-[10px] uppercase tracking-wider transition-all cursor-pointer font-medium ${
                       inStock === val
                         ? val
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "bg-red-500/20 text-red-400 border border-red-500/30"
-                        : "text-white/30 border border-white/10 hover:border-white/20"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-xs"
+                          : "bg-red-50 text-red-800 border border-red-300 shadow-xs"
+                        : "text-ink/50 bg-paper border border-brand hover:border-ink/20"
                     }`}
                   >
                     {val ? "In Stock" : "Out of Stock"}
@@ -166,25 +165,25 @@ export function ProductOverrideForm({ product, override }: Props) {
 
           {/* Description override */}
           <div>
-            <label className="font-label text-[10px] text-white/35 uppercase tracking-wider block mb-1.5">
-              Description Override <span className="text-white/20 normal-case">· leave blank to use original</span>
+            <label className="font-label text-[10px] text-ink/60 uppercase tracking-wider block mb-1.5 font-medium">
+              Description Override <span className="text-ink/35 normal-case font-normal">· leave blank to use original</span>
             </label>
             <textarea
               rows={3}
               placeholder={product.description ?? "Original description…"}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-[10px] font-body text-sm text-white/80 bg-white/5 border border-white/10 outline-none focus:border-white/25 placeholder:text-white/20 transition-colors resize-none"
+              className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-paper border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all resize-none"
             />
           </div>
 
-          {success && <p className="font-body text-xs text-emerald-400">✓ Saved.</p>}
-          {error && <p className="font-body text-xs text-red-400">{error}</p>}
+          {success && <p className="font-body text-xs text-emerald-700 font-medium">✓ Saved successfully.</p>}
+          {error && <p className="font-body text-xs text-red-600 font-medium">{error}</p>}
 
           <button
             type="submit"
             disabled={isPending}
-            className="px-5 py-2 bg-berry text-paper font-label text-[10px] uppercase tracking-widest rounded-[10px] hover:bg-[#580118] disabled:opacity-50 transition-all active:scale-[0.98]"
+            className="px-6 py-2.5 bg-berry text-paper font-label text-[10.5px] uppercase tracking-widest rounded-[10px] hover:bg-[#580118] disabled:opacity-50 transition-all active:scale-[0.98] shadow-sm cursor-pointer font-medium"
           >
             {isPending ? "Saving…" : "Save Override"}
           </button>

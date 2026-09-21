@@ -42,25 +42,22 @@ export function OrderStatusForm({ orderId, currentStatus, currentTracking }: Pro
   }
 
   return (
-    <div
-      className="rounded-[14px] p-6 border"
-      style={{ backgroundColor: "#1c1917", borderColor: "rgba(255,255,255,0.07)" }}
-    >
-      <p className="font-label text-[10px] text-white/30 uppercase tracking-wider mb-4">Update Order</p>
+    <div className="rounded-[18px] p-6 bg-paper border border-brand shadow-soft">
+      <p className="font-label text-[10px] text-ink/45 uppercase tracking-wider mb-4 font-semibold">Update Order</p>
 
       <form onSubmit={handleSave} className="space-y-4">
         {/* Status select */}
         <div>
-          <label className="font-label text-[10px] text-white/40 uppercase tracking-wider block mb-1.5">
+          <label className="font-label text-[10px] text-ink/60 uppercase tracking-wider block mb-1.5 font-medium">
             Status
           </label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-3 py-3 rounded-[10px] font-body text-sm text-white/80 bg-white/5 border border-white/10 outline-none focus:border-white/25 transition-colors capitalize"
+            className="w-full px-3.5 py-2.5 rounded-[12px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper transition-all capitalize"
           >
             {STATUSES.map((s) => (
-              <option key={s} value={s} className="bg-[#1c1917] capitalize">
+              <option key={s} value={s} className="capitalize">
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </option>
             ))}
@@ -69,29 +66,29 @@ export function OrderStatusForm({ orderId, currentStatus, currentTracking }: Pro
 
         {/* Tracking number */}
         <div>
-          <label className="font-label text-[10px] text-white/40 uppercase tracking-wider block mb-1.5">
-            Tracking Number <span className="text-white/20 normal-case">(optional)</span>
+          <label className="font-label text-[10px] text-ink/60 uppercase tracking-wider block mb-1.5 font-medium">
+            Tracking Number <span className="text-ink/35 normal-case font-normal">(optional)</span>
           </label>
           <input
             type="text"
             placeholder="e.g. SR1234567890"
             value={tracking}
             onChange={(e) => setTracking(e.target.value)}
-            className="w-full px-3 py-3 rounded-[10px] font-body text-sm text-white/80 bg-white/5 border border-white/10 outline-none focus:border-white/25 placeholder:text-white/20 transition-colors"
+            className="w-full px-3.5 py-2.5 rounded-[12px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all"
           />
         </div>
 
         {success && (
-          <p className="font-body text-xs text-emerald-400">✓ Order updated successfully.</p>
+          <p className="font-body text-xs text-emerald-700 font-medium">✓ Order updated successfully.</p>
         )}
         {error && (
-          <p className="font-body text-xs text-red-400">{error}</p>
+          <p className="font-body text-xs text-red-600 font-medium">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={isPending}
-          className="px-6 py-2.5 bg-berry text-paper font-label text-[10px] uppercase tracking-widest rounded-[10px] hover:bg-[#580118] disabled:opacity-50 transition-all duration-200 active:scale-[0.98]"
+          className="px-6 py-2.5 bg-berry text-paper font-label text-[10.5px] uppercase tracking-widest rounded-[10px] hover:bg-[#580118] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
         >
           {isPending ? "Saving…" : "Save Changes"}
         </button>

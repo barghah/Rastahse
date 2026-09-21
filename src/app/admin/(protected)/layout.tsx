@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { ReactNode } from "react";
@@ -7,7 +8,7 @@ import type { ReactNode } from "react";
 /**
  * Admin layout — Server Component auth guard.
  * Checks session AND is_admin on every request.
- * Renders a minimal dark sidebar with navigation.
+ * Styled in Rastah's signature warm paper/cream atelier theme.
  */
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   // Skip auth check in dev when Supabase env vars not set
@@ -28,7 +29,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       .single();
 
     if (!profile?.is_admin) {
-      // Sign out the non-admin user and redirect
+      // Sign out non-admin user and redirect
       await supabase.auth.signOut();
       redirect("/admin/login");
     }
@@ -42,47 +43,57 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   ];
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#111010" }}>
+    <div className="min-h-screen flex bg-surface text-ink">
       {/* ── Sidebar ── */}
-      <aside
-        className="w-56 shrink-0 flex flex-col border-r"
-        style={{ borderColor: "rgba(255,255,255,0.07)", backgroundColor: "#161412" }}
-      >
+      <aside className="w-60 shrink-0 flex flex-col border-r border-brand bg-paper shadow-xs">
         {/* Brand mark */}
-        <div className="px-5 py-6 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-          <p className="font-label text-[11px] text-white/70 tracking-[0.25em] uppercase">
-            RASTAH से
-          </p>
-          <p className="font-body text-[10px] text-white/25 mt-0.5">Admin Panel</p>
+        <div className="px-6 py-6 border-b border-brand">
+          <Link href="/admin" className="flex items-center gap-3">
+            <div className="w-8 h-auto">
+              <Image
+                src="/brand/logos/emblem-intact.png"
+                alt="RASTAH"
+                width={433}
+                height={808}
+                className="w-full h-auto object-contain"
+              />
+            </div>
+            <div>
+              <p className="font-label text-[11px] text-ink tracking-[0.25em] uppercase font-medium">
+                RASTAH <span className="text-berry font-serif font-medium">से</span>
+              </p>
+              <p className="font-body text-[10px] text-ink/40 mt-0.5">Admin Archive</p>
+            </div>
+          </Link>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 py-4 px-3 space-y-1">
+        {/* Nav Links */}
+        <nav className="flex-1 py-5 px-3.5 space-y-1.5">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] font-label text-[11px] text-white/50 hover:text-white hover:bg-white/5 transition-all duration-150"
+              className="flex items-center gap-3 px-3.5 py-2.5 rounded-[12px] font-label text-[11.5px] text-ink/70 hover:text-berry hover:bg-surface transition-all duration-150 font-medium"
             >
-              <span className="text-base leading-none">{link.icon}</span>
+              <span className="text-base leading-none text-ink/40">{link.icon}</span>
               {link.label}
             </Link>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="px-5 py-4 border-t" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+        {/* Footer actions */}
+        <div className="px-5 py-4 border-t border-brand space-y-2">
           <Link
             href="/"
-            className="font-label text-[10px] text-white/25 hover:text-white/50 transition-colors"
+            className="flex items-center gap-2 font-label text-[10.5px] text-ink/50 hover:text-berry transition-colors uppercase tracking-wider"
           >
-            ← Back to store
+            ← Storefront
           </Link>
         </div>
       </aside>
 
-      {/* ── Main content ── */}
-      <main className="flex-1 overflow-y-auto">
+      {/* ── Main Dashboard Content ── */}
+      <main className="flex-1 overflow-y-auto bg-surface">
         {children}
       </main>
     </div>

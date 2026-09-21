@@ -17,7 +17,7 @@ export function MarkRepliedButton({ messageId }: { messageId: string }) {
         })
       }
       disabled={isPending}
-      className="px-4 py-1.5 bg-berry/20 border border-berry/30 rounded-[8px] font-label text-[10px] text-berry hover:bg-berry/30 disabled:opacity-50 transition-all uppercase tracking-wider"
+      className="px-4 py-2 bg-berry text-paper font-label text-[10.5px] uppercase tracking-wider rounded-[10px] hover:bg-[#580118] disabled:opacity-50 transition-all active:scale-[0.98] shadow-xs cursor-pointer font-medium"
     >
       {isPending ? "Marking…" : "Mark Replied"}
     </button>

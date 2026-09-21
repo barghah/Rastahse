@@ -7,46 +7,47 @@ export default async function AdminMessagesPage() {
   const unread = messages.filter((m) => !m.replied).length;
 
   return (
-    <div className="p-6 sm:p-8 space-y-6">
+    <div className="p-6 sm:p-8 space-y-6 max-w-5xl">
       <div>
-        <h1 className="font-label text-xl text-white/90 font-light tracking-wide">Messages</h1>
-        <p className="font-body text-xs text-white/30 mt-1">
-          {messages.length} total · {unread} unread
+        <h1 className="font-label text-2xl text-ink font-semibold tracking-tight">Customer Messages</h1>
+        <p className="font-body text-xs text-ink/50 mt-1">
+          {messages.length} total message{messages.length !== 1 ? "s" : ""} · {unread} unread
         </p>
       </div>
 
       {messages.length === 0 ? (
-        <div
-          className="rounded-[14px] p-10 text-center border"
-          style={{ backgroundColor: "#1c1917", borderColor: "rgba(255,255,255,0.07)" }}
-        >
-          <p className="font-body text-sm text-white/30">No messages yet.</p>
+        <div className="rounded-[18px] p-12 text-center bg-paper border border-brand shadow-soft">
+          <p className="font-body text-sm text-ink/40">No messages yet.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className="rounded-[14px] p-5 border space-y-3"
-              style={{
-                backgroundColor: msg.replied ? "#161412" : "#1c1917",
-                borderColor: msg.replied ? "rgba(255,255,255,0.05)" : "rgba(108,2,34,0.3)",
-              }}
+              className={`rounded-[18px] p-6 border shadow-soft space-y-4 transition-all ${
+                msg.replied
+                  ? "bg-paper/70 border-brand opacity-85"
+                  : "bg-paper border-berry/30 ring-1 ring-berry/10"
+              }`}
             >
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-label text-sm text-white/80">{msg.name}</p>
-                    {!msg.replied && (
-                      <span className="px-2 py-0.5 rounded-full bg-berry/20 text-berry font-label text-[9px] uppercase tracking-wider">
+                    <p className="font-label text-sm text-ink font-semibold">{msg.name}</p>
+                    {!msg.replied ? (
+                      <span className="px-2.5 py-0.5 rounded-full bg-berry/10 border border-berry/20 text-berry font-label text-[9.5px] uppercase tracking-wider font-semibold">
                         New
+                      </span>
+                    ) : (
+                      <span className="font-label text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-medium">
+                        ✓ Replied
                       </span>
                     )}
                   </div>
-                  <p className="font-body text-xs text-white/35 mt-0.5">{msg.email}</p>
+                  <p className="font-body text-xs text-ink/50 mt-0.5">{msg.email}</p>
                 </div>
-                <p className="font-body text-[10px] text-white/25 shrink-0">
+                <p className="font-body text-[11px] text-ink/40 shrink-0">
                   {new Date(msg.created_at).toLocaleDateString("en-IN", {
                     day: "numeric", month: "short", year: "numeric",
                   })}
@@ -55,13 +56,15 @@ export default async function AdminMessagesPage() {
 
               {/* Subject */}
               {msg.subject && (
-                <p className="font-label text-[11px] text-white/50 uppercase tracking-wider">
-                  {msg.subject}
-                </p>
+                <div>
+                  <span className="font-label text-[11px] text-berry font-medium uppercase tracking-wider bg-berry/5 px-2.5 py-1 rounded-md border border-berry/15 inline-block">
+                    {msg.subject}
+                  </span>
+                </div>
               )}
 
               {/* Message body */}
-              <p className="font-body text-sm text-white/65 leading-relaxed">
+              <p className="font-body text-sm text-ink/80 leading-relaxed whitespace-pre-wrap bg-surface/40 p-4 rounded-[12px] border border-brand/60">
                 {msg.message}
               </p>
 
@@ -69,16 +72,11 @@ export default async function AdminMessagesPage() {
               <div className="flex items-center gap-3 pt-1">
                 <a
                   href={`mailto:${msg.email}?subject=Re: ${encodeURIComponent(msg.subject ?? "Your message to Rastahse")}`}
-                  className="px-4 py-1.5 border border-white/10 rounded-[8px] font-label text-[10px] text-white/40 hover:text-white hover:border-white/25 transition-all uppercase tracking-wider"
+                  className="px-4 py-2 border border-brand rounded-[10px] font-label text-[10.5px] text-ink/70 hover:text-berry hover:border-berry/30 bg-paper transition-all uppercase tracking-wider font-medium shadow-xs inline-flex items-center gap-1.5"
                 >
                   Reply via email ↗
                 </a>
                 {!msg.replied && <MarkRepliedButton messageId={msg.id} />}
-                {msg.replied && (
-                  <span className="font-label text-[10px] text-white/20 uppercase tracking-wider">
-                    ✓ Replied
-                  </span>
-                )}
               </div>
             </div>
           ))}
