@@ -16,30 +16,38 @@ interface SearchBarProps {
 
 export function SearchBar({ open, onClose }: SearchBarProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Product[]>([]);
-  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [rawResults, setResults] = useState<Product[]>([]);
+  const [rawTags, setTagSuggestions] = useState<string[]>([]);
+  const [prevOpen, setPrevOpen] = useState(open);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const allTags = getAllTags();
 
-  // Auto-focus
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
+  // Reset when the bar closes (adjust state during render, not in an effect)
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (!open) {
       setQuery("");
       setResults([]);
       setTagSuggestions([]);
     }
+  }
+
+  // An empty query always shows nothing
+  const hasQuery = query.trim().length > 0;
+  const results = hasQuery ? rawResults : [];
+  const tagSuggestions = hasQuery ? rawTags : [];
+
+  // Auto-focus
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(t);
   }, [open]);
 
   // Debounced search — 150ms
   useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      setTagSuggestions([]);
-      return;
-    }
+    if (!query.trim()) return;
 
     const timer = setTimeout(() => {
       const q = query.trim();

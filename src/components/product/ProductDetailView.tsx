@@ -11,7 +11,6 @@ import { LikeButton } from "@/components/product/LikeButton";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useCartStore } from "@/stores/cart-store";
 import { useToastStore } from "@/stores/toast-store";
-import { Button } from "@/components/ui/Button";
 import { BrandLoader } from "@/components/ui/BrandLoader";
 
 interface ProductDetailViewProps {
@@ -22,7 +21,6 @@ interface ProductDetailViewProps {
 export function ProductDetailView({ product, relatedProducts }: ProductDetailViewProps) {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
-  const openCart = useCartStore((s) => s.openCart);
   const showToast = useToastStore((s) => s.showToast);
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(

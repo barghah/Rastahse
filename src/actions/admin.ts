@@ -190,7 +190,9 @@ export async function upsertProductOverride(
         error.code === "42703"
       ) {
         // Fallback: save price, description, in_stock only
-        const { is_hidden, is_deleted, ...coreFields } = overrides;
+        const coreFields = { ...overrides };
+        delete coreFields.is_hidden;
+        delete coreFields.is_deleted;
         const { error: fallbackErr } = await admin.from("product_overrides").upsert(
           {
             product_id: productId,
@@ -267,7 +269,7 @@ export async function getAdminCustomers(): Promise<AdminCustomer[]> {
     phone?: string;
     created_at: string;
     last_sign_in_at?: string | null;
-    user_metadata?: Record<string, any>;
+    user_metadata?: Record<string, string | undefined>;
   }> = [];
 
   try {
@@ -464,7 +466,7 @@ export async function createProduct(
 
     if (error) return { success: false, error: error.message };
 
-    const newId = (data as any)?.id as string | undefined;
+    const newId: string | undefined = data?.id;
     if (newId && input.stock > 0 && (input.unitCost ?? 0) > 0) {
       const led = await recordInventoryPurchase(admin, {
         productId: newId,

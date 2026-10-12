@@ -8,9 +8,8 @@ export const metadata = { title: "Delivery Schedule — Rastah Admin" };
 export default async function AdminDeliveryPage() {
   const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [orders, settings] = await Promise.all([
-    hasSupabase ? (getAdminOrders() as Promise<any[]>) : Promise.resolve([]),
+    hasSupabase ? getAdminOrders() : Promise.resolve([]),
     getDeliverySettings(),
   ]);
 

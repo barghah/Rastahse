@@ -1,13 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { getPublicProducts, getVisibleCategories, getAllTags } from "@/lib/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { BackgroundMotif } from "@/components/brand/SectionDivider";
-import type { CategorySlug } from "@/types/product";
 
 export default function ShopPage() {
   const allProducts = useMemo(() => getPublicProducts(), []);
@@ -141,7 +140,7 @@ export default function ShopPage() {
                 onClick={() => setSearchQuery("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-ink/40 hover:text-ink p-1"
               >
-                ✕
+                âœ•
               </button>
             )}
           </div>
@@ -168,7 +167,7 @@ export default function ShopPage() {
             <span className="font-label text-[10px] text-ink/50 uppercase">Sort:</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="bg-surface border border-brand rounded-[10px] px-3 py-1.5 font-label text-[10px] text-ink focus:outline-none focus:border-berry"
             >
               <option value="featured">Curated & Featured</option>

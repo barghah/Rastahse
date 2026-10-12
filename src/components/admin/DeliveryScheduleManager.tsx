@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo, useCallback } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { saveDeliverySettings } from "@/actions/delivery";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { getContactMessages, markMessageReplied } from "@/actions/admin";
+import { getContactMessages } from "@/actions/admin";
 import { MarkRepliedButton } from "@/components/admin/MarkRepliedButton";
 
 export default async function AdminMessagesPage() {

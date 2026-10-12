@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/stores/cart-store";
 import { formatPrice } from "@/types/product";
@@ -11,7 +10,6 @@ import { BrandLoader } from "@/components/ui/BrandLoader";
 import { DispatchNotice } from "@/components/checkout/DispatchNotice";
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { items, totalPrice, clearCart, closeCart } = useCartStore();
 
   // Ensure cart drawer is closed on checkout page
@@ -38,7 +36,7 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState<string>("");
 
   const total = totalPrice();
-  const shipping = total > 200000 ? 0 : 15000; // Free above ₹2,000
+  const shipping = total > 200000 ? 0 : 15000; // Free above â‚¹2,000
   const grandTotal = total + shipping;
 
   const handleSubmitOrder = (e: React.FormEvent) => {
@@ -379,7 +377,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-body text-xs text-ink truncate font-medium">{item.name}</p>
-                        <p className="font-label text-[9px] text-ink/50">{item.variantName} × {item.quantity}</p>
+                        <p className="font-label text-[9px] text-ink/50">{item.variantName} Ã— {item.quantity}</p>
                       </div>
                       <span className="font-label text-xs text-ink font-medium">
                         {formatPrice(item.price * item.quantity)}

@@ -45,8 +45,8 @@ export function IntroAnimation() {
     // Mark as seen so internal navigation doesn't replay
     sessionStorage.setItem("rastah_intro_seen", "1");
 
-    // Activate interactive Framer Motion animation
-    setPhase("active");
+    // Activate interactive Framer Motion animation (next tick; the HTML veil covers the gap)
+    const startTimer = setTimeout(() => setPhase("active"), 0);
 
     // Hold for ~1.85s then start architectural curtain wipe exit
     timerRef.current = setTimeout(() => {
@@ -55,6 +55,7 @@ export function IntroAnimation() {
     }, 1850);
 
     return () => {
+      clearTimeout(startTimer);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [pathname]);

@@ -21,10 +21,13 @@ export function AdminMobileNav({ navLinks, adminEmail }: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close drawer on route change
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+
+  // Close drawer on route change (adjust state during render, not in an effect)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setDrawerOpen(false);
-  }, [pathname]);
+  }
 
   // Lock body scroll when drawer is open
   useEffect(() => {

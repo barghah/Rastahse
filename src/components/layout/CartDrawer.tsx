@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,13 +9,14 @@ import { formatPrice } from "@/types/product";
 import { Button } from "@/components/ui/Button";
 
 export function CartDrawer() {
-  const [mounted, setMounted] = useState(false);
+  // false during SSR/hydration, true on the client afterwards (no setState-in-effect)
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice } = useCartStore();
   const drawerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close on Escape
   useEffect(() => {

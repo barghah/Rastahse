@@ -11,7 +11,6 @@ interface Props {
 export function CustomerListTable({ customers }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "with_orders" | "admins">("all");
-  const [selectedCustomer, setSelectedCustomer] = useState<AdminCustomer | null>(null);
 
   const filtered = useMemo(() => {
     return customers.filter((c) => {

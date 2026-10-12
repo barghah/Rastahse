@@ -47,7 +47,6 @@ export function ProductOverrideForm({ product, override }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const hasPriceOverride = override?.price_override !== undefined;
-  const hasDescOverride = Boolean(override?.description_override);
 
   // Quick Action: Toggle Visibility
   function handleToggleVisibility(e: React.MouseEvent) {
