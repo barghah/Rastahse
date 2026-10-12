@@ -12,13 +12,32 @@ CREATE TABLE IF NOT EXISTS public.accounting_entries (
                  'inventory_purchase',
                  'sales_revenue',
                  'shipping_expense',
+                 'packaging_expense',
+                 'marketing_expense',
+                 'operational_expense',
+                 'other_expense',
                  'vendor_payable',
                  'customer_receivable'
                )),
   amount       numeric(14, 2) NOT NULL CHECK (amount >= 0),
-  reference_id text,            -- order id or product id
+  reference_id text,            -- order id, product id, or receipt/invoice #
   notes        text
 );
+
+-- Update constraint if table was created previously with fewer categories
+ALTER TABLE public.accounting_entries DROP CONSTRAINT IF EXISTS accounting_entries_category_check;
+ALTER TABLE public.accounting_entries ADD CONSTRAINT accounting_entries_category_check 
+  CHECK (category IN (
+    'inventory_purchase',
+    'sales_revenue',
+    'shipping_expense',
+    'packaging_expense',
+    'marketing_expense',
+    'operational_expense',
+    'other_expense',
+    'vendor_payable',
+    'customer_receivable'
+  ));
 
 CREATE INDEX IF NOT EXISTS accounting_entries_created_at_idx
   ON public.accounting_entries (created_at DESC);
@@ -27,3 +46,4 @@ CREATE INDEX IF NOT EXISTS accounting_entries_reference_idx
 
 -- Admin-only: RLS on with no policies; the service-role client bypasses RLS.
 ALTER TABLE public.accounting_entries ENABLE ROW LEVEL SECURITY;
+

@@ -10,7 +10,11 @@ const inr = (n: number) =>
 const CATEGORY_LABEL: Record<string, string> = {
   inventory_purchase: "Inventory purchase",
   sales_revenue: "Sales revenue",
-  shipping_expense: "Shipping expense",
+  shipping_expense: "Shipping & delivery",
+  packaging_expense: "Packaging & supplies",
+  marketing_expense: "Marketing & promo",
+  operational_expense: "Operations & utilities",
+  other_expense: "Other expense",
   vendor_payable: "Vendor payable",
   customer_receivable: "Customer receivable",
 };

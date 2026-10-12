@@ -12,6 +12,10 @@ export type EntryCategory =
   | "inventory_purchase"
   | "sales_revenue"
   | "shipping_expense"
+  | "packaging_expense"
+  | "marketing_expense"
+  | "operational_expense"
+  | "other_expense"
   | "vendor_payable"
   | "customer_receivable";
 

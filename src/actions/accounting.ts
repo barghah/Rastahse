@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/actions/admin";
-import { recordInventoryPurchase } from "@/lib/accounting";
+import { recordInventoryPurchase, type NewEntry } from "@/lib/accounting";
 
 export interface LedgerEntry {
   id: string;
@@ -157,3 +157,69 @@ export async function settlePayables(amount: number): Promise<{ success: boolean
     return { success: false, error: err instanceof Error ? err.message : "Failed to settle." };
   }
 }
+
+export type ExpenseCategory =
+  | "shipping_expense"
+  | "packaging_expense"
+  | "marketing_expense"
+  | "operational_expense"
+  | "other_expense";
+
+/** Record general business expenses (shipping, packaging, marketing, operations, miscellaneous). */
+export async function recordGeneralExpense(input: {
+  category: ExpenseCategory;
+  amount: number;
+  notes: string;
+  referenceId?: string;
+  onCredit?: boolean;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAdmin();
+    if (!Number.isFinite(input.amount) || input.amount <= 0) {
+      return { success: false, error: "Enter a valid expense amount greater than 0." };
+    }
+    if (!input.notes || !input.notes.trim()) {
+      return { success: false, error: "Please enter a description or note for this expense." };
+    }
+
+    const admin = await createAdminClient();
+    const entries: NewEntry[] = [
+      {
+        type: "debit",
+        category: input.category,
+        amount: Math.round(input.amount * 100) / 100,
+        reference_id: input.referenceId?.trim() || null,
+        notes: input.notes.trim(),
+      },
+    ];
+
+    if (input.onCredit) {
+      entries.push({
+        type: "credit",
+        category: "vendor_payable",
+        amount: Math.round(input.amount * 100) / 100,
+        reference_id: input.referenceId?.trim() || null,
+        notes: `Payable: ${input.notes.trim()}`,
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from("accounting_entries") as any).insert(entries);
+
+    if (error) {
+      if (error.message?.includes("accounting_entries_category_check")) {
+        return {
+          success: false,
+          error: "Database constraint: Run the updated SQL in Supabase SQL Editor to allow new expense categories.",
+        };
+      }
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/admin/accounting");
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to record expense." };
+  }
+}
+
