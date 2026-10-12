@@ -1,11 +1,51 @@
-import { getProductOverrides } from "@/actions/admin";
+import { getProductOverrides, getDbProducts, type DbProduct } from "@/actions/admin";
 import { getPublicProducts } from "@/lib/products";
 import { ProductCatalogManager } from "@/components/admin/ProductCatalogManager";
+import type { Product, CategorySlug } from "@/types/product";
+
+export const dynamic = "force-dynamic";
+
+function mapDbProductToProduct(db: DbProduct): Product {
+  return {
+    id: db.id,
+    slug: db.slug,
+    name: db.title,
+    description: db.description || "",
+    story: "",
+    price: db.price,
+    categorySlug: (db.category as CategorySlug) || "bags",
+    tags: db.tags || [],
+    images: (db.images || []).map((img) => ({
+      url: img.url,
+      alt: img.alt || db.title,
+    })),
+    variants: [
+      {
+        id: `${db.id}-variant`,
+        name: "Standard",
+        sku: db.sku,
+        stock: db.stock,
+        lowStockThreshold: 2,
+      },
+    ],
+    curated: false,
+    visible: db.is_visible,
+    oneOfOne: false,
+    createdAt: db.created_at || new Date().toISOString(),
+  };
+}
 
 export default async function AdminProductsPage() {
   const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const allProducts = getPublicProducts();
-  const overrides = hasSupabase ? await getProductOverrides() : {};
+  const staticProducts = getPublicProducts();
+  const [dbProducts, overrides] = await Promise.all([
+    hasSupabase ? getDbProducts() : Promise.resolve([]),
+    hasSupabase ? getProductOverrides() : Promise.resolve({}),
+  ]);
+
+  const mappedDb = dbProducts.map(mapDbProductToProduct);
+  // Put newly added database products at the top of the list
+  const allProducts = [...mappedDb, ...staticProducts];
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl">
@@ -25,3 +65,4 @@ export default async function AdminProductsPage() {
     </div>
   );
 }
+

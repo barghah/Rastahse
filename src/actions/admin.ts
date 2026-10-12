@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import type { Database } from "@/types/supabase";
 import { recordOrderCompletion, recordInventoryPurchase } from "@/lib/accounting";
 
@@ -216,6 +217,7 @@ export async function upsertProductOverride(
       return { success: false, error: error.message };
     }
 
+    revalidatePath("/admin/products");
     return { success: true };
   } catch (err) {
     return {
@@ -478,6 +480,8 @@ export async function createProduct(
         return { success: true, id: newId, error: `Product saved, but ledger entry failed: ${led.error}` };
       }
     }
+    revalidatePath("/admin/products");
+    revalidatePath("/admin/accounting");
     return { success: true, id: newId };
   } catch (err) {
     return {
