@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCartStore } from "@/stores/cart-store";
 import { formatPrice } from "@/types/product";
 import { BrandLoader } from "@/components/ui/BrandLoader";
+import { DispatchNotice } from "@/components/checkout/DispatchNotice";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -408,6 +409,9 @@ export default function CheckoutPage() {
                     <span className="text-berry font-bold">{formatPrice(grandTotal)}</span>
                   </div>
                 </div>
+
+                {/* Dispatch Notice */}
+                <DispatchNotice />
 
                 {/* Place Order CTA with Animated Click & Submit State */}
                 <motion.button

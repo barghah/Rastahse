@@ -214,6 +214,19 @@ export function ProductOverrideForm({ product, override }: Props) {
           </div>
 
           <div className="min-w-0 flex-1">
+            {/* SKU Badge — shown prominently before name */}
+            {(() => {
+              const sku = product.variants?.find((v) => v.sku)?.sku;
+              if (!sku) return null;
+              return (
+                <div className="mb-1">
+                  <span className="inline-block px-2 py-0.5 rounded-md bg-ink/8 border border-brand font-mono text-[10px] text-ink/60 font-bold tracking-wider uppercase">
+                    {sku}
+                  </span>
+                </div>
+              );
+            })()}
+
             <div className="flex items-center gap-2 flex-wrap">
               <h3
                 className={`font-body text-sm font-semibold truncate ${
@@ -263,6 +276,7 @@ export function ProductOverrideForm({ product, override }: Props) {
               <span>· {product.categorySlug}</span>
             </div>
           </div>
+
         </div>
 
         {/* Right: Quick Action Controls */}

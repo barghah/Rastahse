@@ -26,10 +26,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const navLinks = [
     { href: "/admin",           label: "Dashboard", icon: "▦" },
     { href: "/admin/orders",    label: "Orders",    icon: "📦" },
+    { href: "/admin/delivery",  label: "Delivery",  icon: "🚚" },
     { href: "/admin/products",  label: "Products",  icon: "🪨" },
+    { href: "/admin/accounting", label: "Accounting", icon: "💰" },
     { href: "/admin/customers", label: "Customers", icon: "👥" },
     { href: "/admin/messages",  label: "Messages",  icon: "✉️" },
   ];
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-surface text-ink antialiased">

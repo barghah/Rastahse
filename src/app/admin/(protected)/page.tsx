@@ -1,4 +1,5 @@
 import { getAdminStats, getAdminOrders } from "@/actions/admin";
+import { AdminInsightChart } from "@/components/admin/AdminInsightChart";
 import Link from "next/link";
 
 const STATUS_BADGE: Record<string, string> = {
@@ -17,15 +18,16 @@ export default async function AdminDashboard() {
     !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   let stats = { totalOrders: 0, totalRevenue: 0, pendingOrders: 0, unreadMessages: 0, totalCustomers: 0 };
-  let recentOrders: Awaited<ReturnType<typeof getAdminOrders>> = [];
+  let allOrders: Awaited<ReturnType<typeof getAdminOrders>> = [];
 
   if (hasSupabase) {
-    [stats, recentOrders] = await Promise.all([
+    [stats, allOrders] = await Promise.all([
       getAdminStats(),
       getAdminOrders(),
     ]);
-    recentOrders = recentOrders.slice(0, 5);
   }
+
+  const recentOrders = allOrders.slice(0, 5);
 
   const statCards = [
     { label: "Total Orders",      value: stats.totalOrders,                                sub: "all time", href: "/admin/orders" },
@@ -56,6 +58,10 @@ export default async function AdminDashboard() {
           </Link>
         ))}
       </div>
+
+      {/* ── Insight Chart ── */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <AdminInsightChart orders={allOrders as any[]} />
 
       {/* Recent orders */}
       <div className="space-y-4">

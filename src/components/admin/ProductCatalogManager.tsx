@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ProductOverrideForm } from "./ProductOverrideForm";
+import { AddProductModal } from "./AddProductModal";
 import type { Product } from "@/types/product";
 import type { ProductOverride } from "@/actions/admin";
 
@@ -20,6 +21,7 @@ export function ProductCatalogManager({ allProducts, overrides }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAll, setShowAll] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Compute counts for status badges
   const counts = useMemo(() => {
@@ -96,7 +98,11 @@ export function ProductCatalogManager({ allProducts, overrides }: Props) {
         const matchesName = product.name.toLowerCase().includes(q);
         const matchesCategory = product.categorySlug?.toLowerCase().includes(q);
         const matchesTag = product.tags?.some((t) => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesCategory && !matchesTag) return false;
+        // Also match by variant SKU / product code
+        const matchesSku = product.variants?.some(
+          (v) => v.sku?.toLowerCase().includes(q)
+        ) || product.id.toLowerCase().includes(q);
+        if (!matchesName && !matchesCategory && !matchesTag && !matchesSku) return false;
       }
 
       return true;
@@ -128,8 +134,29 @@ export function ProductCatalogManager({ allProducts, overrides }: Props) {
     setCurrentPage(1);
   }
 
+  // Collect unique categories from products for the modal
+  const categoryList = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of allProducts) {
+      if (p.categorySlug) set.add(p.categorySlug);
+    }
+    return Array.from(set).sort();
+  }, [allProducts]);
+
   return (
     <div className="space-y-6">
+      {/* ── Add Product Button ── */}
+      <div className="flex items-center justify-end">
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-berry hover:bg-[#580118] text-paper font-label text-[10.5px] uppercase tracking-widest rounded-[12px] shadow-sm transition-all active:scale-[0.98] cursor-pointer font-semibold"
+        >
+          <span className="text-base leading-none">✚</span>
+          <span>Add New Product</span>
+        </button>
+      </div>
+
       {/* ── Search and Filter Controls ── */}
       <div className="bg-paper p-5 rounded-[20px] border border-brand shadow-soft space-y-4">
         {/* Search bar & Category dropdown */}
@@ -137,7 +164,7 @@ export function ProductCatalogManager({ allProducts, overrides }: Props) {
           <div className="relative flex-1 w-full">
             <input
               type="text"
-              placeholder="Search products by title, category, or artisan tag…"
+              placeholder="Search by name, SKU, category, or tag…"
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-[12px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/35 transition-all"
@@ -335,6 +362,14 @@ export function ProductCatalogManager({ allProducts, overrides }: Props) {
             Next →
           </button>
         </div>
+      )}
+
+      {/* ── Add Product Modal ── */}
+      {showAddModal && (
+        <AddProductModal
+          onClose={() => setShowAddModal(false)}
+          categories={categoryList}
+        />
       )}
     </div>
   );

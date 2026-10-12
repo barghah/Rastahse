@@ -4,6 +4,7 @@ import { cache } from "react";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Database } from "@/types/supabase";
+import { recordOrderCompletion, recordInventoryPurchase } from "@/lib/accounting";
 
 export interface ProductOverride {
   price_override?: number;
@@ -52,6 +53,7 @@ export const requireAdmin = cache(async () => {
 
 // ─── Stats ─────────────────────────────────────────────────────────────────────
 export async function getAdminStats() {
+  await requireAdmin();
   const admin = await createAdminClient();
 
   const [orders, messages, profiles] = await Promise.all([
@@ -76,6 +78,7 @@ export async function getAdminStats() {
 
 // ─── Orders ─────────────────────────────────────────────────────────────────────
 export async function getAdminOrders(statusFilter?: string) {
+  await requireAdmin();
   const admin = await createAdminClient();
 
   let query = admin
@@ -93,6 +96,7 @@ export async function getAdminOrders(statusFilter?: string) {
 }
 
 export async function getAdminOrder(id: string) {
+  await requireAdmin();
   const admin = await createAdminClient();
   const { data } = await admin
     .from("orders")
@@ -107,6 +111,7 @@ export async function updateOrderStatus(
   status: string,
   trackingNumber?: string
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   try {
     const admin = await createAdminClient();
     type OrderUpdate = Database["public"]["Tables"]["orders"]["Update"];
@@ -115,6 +120,14 @@ export async function updateOrderStatus(
 
     const { error } = await admin.from("orders").update(update).eq("id", id);
     if (error) return { success: false, error: error.message };
+
+    // Order completed → credit sales revenue + reduce stock (idempotent)
+    if (status === "delivered") {
+      const res = await recordOrderCompletion(admin, id);
+      if (res.error) {
+        return { success: true, error: `Order saved, but ledger sync failed: ${res.error}` };
+      }
+    }
     return { success: true };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Failed to update order status" };
@@ -123,6 +136,7 @@ export async function updateOrderStatus(
 
 // ─── Product Overrides (Hide / Delete / Stock / Price) ──────────────────────────
 export async function getProductOverrides(): Promise<Record<string, ProductOverride>> {
+  await requireAdmin();
   const admin = await createAdminClient();
   const { data, error } = await admin.from("product_overrides").select("*");
   if (error || !data) return {};
@@ -152,6 +166,7 @@ export async function upsertProductOverride(
     is_deleted?: boolean;
   }
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   try {
     const admin = await createAdminClient();
 
@@ -209,23 +224,28 @@ export async function upsertProductOverride(
 }
 
 export async function toggleProductVisibility(productId: string, isHidden: boolean) {
+  await requireAdmin();
   return upsertProductOverride(productId, { is_hidden: isHidden });
 }
 
 export async function deleteProduct(productId: string) {
+  await requireAdmin();
   return upsertProductOverride(productId, { is_deleted: true, is_hidden: true });
 }
 
 export async function restoreProduct(productId: string) {
+  await requireAdmin();
   return upsertProductOverride(productId, { is_deleted: false, is_hidden: false });
 }
 
 export async function toggleProductStock(productId: string, inStock: boolean) {
+  await requireAdmin();
   return upsertProductOverride(productId, { in_stock: inStock });
 }
 
 // ─── Customers / User Details ──────────────────────────────────────────────────
 export async function getAdminCustomers(): Promise<AdminCustomer[]> {
+  await requireAdmin();
   const admin = await createAdminClient();
 
   // Fetch profiles and orders concurrently from Postgres (blazing fast ~50ms)
@@ -372,6 +392,7 @@ export async function getAdminCustomers(): Promise<AdminCustomer[]> {
 
 // ─── Contact Messages ─────────────────────────────────────────────────────────
 export async function getContactMessages() {
+  await requireAdmin();
   const admin = await createAdminClient();
   const { data } = await admin
     .from("contact_messages")
@@ -381,6 +402,7 @@ export async function getContactMessages() {
 }
 
 export async function markMessageReplied(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   try {
     const admin = await createAdminClient();
     const { error } = await admin.from("contact_messages").update({ replied: true }).eq("id", id);
@@ -390,3 +412,147 @@ export async function markMessageReplied(id: string): Promise<{ success: boolean
     return { success: false, error: err instanceof Error ? err.message : "Failed to mark replied" };
   }
 }
+
+// ─── Product Creation (Admin-managed Supabase products) ────────────────────────
+
+export interface CreateProductInput {
+  sku: string;
+  title: string;
+  category: string;
+  price: number; // in paise
+  stock: number;
+  description: string;
+  tags: string[];
+  imageUrls: string[];
+  /** Cost per unit in rupees. When stock > 0 this debits the accounting ledger. */
+  unitCost?: number;
+}
+
+export async function createProduct(
+  input: CreateProductInput
+): Promise<{ success: boolean; error?: string; id?: string }> {
+  await requireAdmin();
+  try {
+    const admin = await createAdminClient();
+
+    const slug = input.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .slice(0, 80);
+
+    const images = input.imageUrls.map((url, i) => ({
+      url,
+      alt: `${input.title} – image ${i + 1}`,
+    }));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (admin.from("db_products") as any).insert({
+      sku: input.sku,
+      title: input.title,
+      slug: `${slug}-${Date.now()}`,
+      category: input.category,
+      price: input.price,
+      stock: input.stock,
+      description: input.description || null,
+      tags: input.tags,
+      images: images,
+      is_visible: true,
+      created_at: new Date().toISOString(),
+    }).select("id").single();
+
+    if (error) return { success: false, error: error.message };
+
+    const newId = (data as any)?.id as string | undefined;
+    if (newId && input.stock > 0 && (input.unitCost ?? 0) > 0) {
+      const led = await recordInventoryPurchase(admin, {
+        productId: newId,
+        productLabel: `${input.sku} ${input.title}`,
+        qty: input.stock,
+        unitCost: input.unitCost!,
+      });
+      if (!led.success) {
+        return { success: true, id: newId, error: `Product saved, but ledger entry failed: ${led.error}` };
+      }
+    }
+    return { success: true, id: newId };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to create product.",
+    };
+  }
+}
+
+export async function uploadProductImage(
+  formData: FormData
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  await requireAdmin();
+  try {
+    const admin = await createAdminClient();
+    const file = formData.get("file") as File | null;
+    const sku = (formData.get("sku") as string) || "product";
+
+    if (!file) return { success: false, error: "No file provided." };
+
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const timestamp = Date.now();
+    const safeSku = sku.replace(/[^a-zA-Z0-9-_]/g, "").toLowerCase();
+    const path = `${safeSku}/${timestamp}.${ext}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const { error: uploadError } = await admin.storage
+      .from("product-images")
+      .upload(path, buffer, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+
+    if (uploadError) return { success: false, error: uploadError.message };
+
+    const { data: urlData } = admin.storage
+      .from("product-images")
+      .getPublicUrl(path);
+
+    return { success: true, url: urlData.publicUrl };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Upload failed.",
+    };
+  }
+}
+
+export interface DbProduct {
+  id: string;
+  sku: string;
+  title: string;
+  slug: string;
+  category: string;
+  price: number;
+  stock: number;
+  description: string | null;
+  tags: string[];
+  images: Array<{ url: string; alt: string }>;
+  is_visible: boolean;
+  created_at: string;
+}
+
+export async function getDbProducts(): Promise<DbProduct[]> {
+  await requireAdmin();
+  try {
+    const admin = await createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (admin.from("db_products") as any)
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error || !data) return [];
+    return data as DbProduct[];
+  } catch {
+    return [];
+  }
+}
+
