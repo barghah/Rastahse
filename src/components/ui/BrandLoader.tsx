@@ -102,7 +102,9 @@ export function BrandLoader({
   const isFullscreen = size === "fullscreen";
   const isLarge = size === "lg" || isFullscreen;
 
-  const emblemW = isLarge ? 72 : 48;
+  const emblemW = isLarge ? 64 : 44;
+  const haloSize = isLarge ? 160 : 120;
+  const rippleSize = isLarge ? 130 : 96;
 
   const content = (
     <div
@@ -110,50 +112,68 @@ export function BrandLoader({
       role="status"
       aria-label={text || "Loading content"}
     >
-      {/* The Intact River Stone & Crimson Berry Emblem with Ambient Pulse Halo */}
+      {/* The Intact River Stone & Crimson Berry Emblem with Concentric Circular Aura */}
       <div className="relative flex items-center justify-center pointer-events-none" style={{ width: emblemW }}>
-        {/* Breathing ambient pulse halo */}
+        {/* Soft radial breathing aura (geometric circle, concentric to emblem) */}
         <motion.div
-          className="absolute inset-0 rounded-full -z-10"
+          className="absolute rounded-full pointer-events-none -z-10"
+          style={{
+            width: haloSize,
+            height: haloSize,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            background: light
+              ? "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 45%, transparent 70%)"
+              : "radial-gradient(circle, rgba(108,2,34,0.18) 0%, rgba(194,161,141,0.1) 42%, transparent 72%)",
+          }}
           animate={{
-            scale: [0.9, 1.45, 0.9],
-            opacity: [0.15, 0.5, 0.15],
+            scale: [0.85, 1.25, 0.85],
+            opacity: [0.35, 0.75, 0.35],
           }}
           transition={{
-            duration: 2.1,
+            duration: 2.4,
             repeat: Infinity,
             ease: "easeInOut",
           }}
+        />
+
+        {/* Concentric resonant ripple ring */}
+        <motion.div
+          className="absolute rounded-full pointer-events-none -z-10"
           style={{
-            background: light
-              ? "radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)"
-              : "radial-gradient(circle, rgba(108,2,34,0.28) 0%, rgba(194,161,141,0.18) 50%, transparent 75%)",
+            width: rippleSize,
+            height: rippleSize,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            border: light
+              ? "1px solid rgba(255,255,255,0.22)"
+              : "1px solid rgba(108,2,34,0.14)",
+          }}
+          animate={{
+            scale: [0.92, 1.4, 0.92],
+            opacity: [0.5, 0, 0.5],
+          }}
+          transition={{
+            duration: 2.4,
+            repeat: Infinity,
+            ease: "easeInOut",
           }}
         />
 
-        {/* Emblem with rhythmic pulse */}
+        {/* Emblem with smooth organic breathing rhythm */}
         <motion.div
           animate={{
-            y: [0, -3, 0],
-            scale: [1, 1.08, 0.99, 1],
-            filter: light
-              ? [
-                  "drop-shadow(0 0 0px rgba(255,255,255,0))",
-                  "drop-shadow(0 0 14px rgba(255,255,255,0.6))",
-                  "drop-shadow(0 0 0px rgba(255,255,255,0))",
-                ]
-              : [
-                  "drop-shadow(0 2px 4px rgba(108,2,34,0.06))",
-                  "drop-shadow(0 6px 18px rgba(108,2,34,0.32))",
-                  "drop-shadow(0 2px 4px rgba(108,2,34,0.06))",
-                ],
+            y: [0, -3.5, 0],
+            scale: [1, 1.03, 1],
           }}
           transition={{
-            duration: 2.1,
+            duration: 2.4,
             repeat: Infinity,
             ease: [0.4, 0, 0.2, 1],
           }}
-          className="w-full h-auto flex items-center justify-center"
+          className="w-full h-auto flex items-center justify-center filter drop-shadow-[0_4px_14px_rgba(108,2,34,0.12)]"
         >
           <Image
             src={
