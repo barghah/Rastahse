@@ -103,6 +103,7 @@ export function BrandLoader({
   const isLarge = size === "lg" || isFullscreen;
 
   const emblemW = isLarge ? 64 : 44;
+  const emblemH = Math.round(emblemW * (844 / 481));
   const haloSize = isLarge ? 160 : 120;
   const rippleSize = isLarge ? 130 : 96;
 
@@ -113,7 +114,10 @@ export function BrandLoader({
       aria-label={text || "Loading content"}
     >
       {/* The Intact River Stone & Crimson Berry Emblem with Concentric Circular Aura */}
-      <div className="relative flex items-center justify-center pointer-events-none" style={{ width: emblemW }}>
+      <div
+        className="relative flex items-center justify-center pointer-events-none"
+        style={{ width: emblemW, height: emblemH }}
+      >
         {/* Soft radial breathing aura (geometric circle, concentric to emblem) */}
         <motion.div
           className="absolute rounded-full pointer-events-none -z-10"
@@ -122,14 +126,15 @@ export function BrandLoader({
             height: haloSize,
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%)",
+            marginLeft: -haloSize / 2,
+            marginTop: -haloSize / 2,
             background: light
-              ? "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 45%, transparent 70%)"
-              : "radial-gradient(circle, rgba(108,2,34,0.18) 0%, rgba(194,161,141,0.1) 42%, transparent 72%)",
+              ? "radial-gradient(circle, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 45%, transparent 70%)"
+              : "radial-gradient(circle, rgba(108,2,34,0.2) 0%, rgba(194,161,141,0.1) 42%, transparent 72%)",
           }}
           animate={{
             scale: [0.85, 1.25, 0.85],
-            opacity: [0.35, 0.75, 0.35],
+            opacity: [0.35, 0.8, 0.35],
           }}
           transition={{
             duration: 2.4,
@@ -146,14 +151,15 @@ export function BrandLoader({
             height: rippleSize,
             left: "50%",
             top: "50%",
-            transform: "translate(-50%, -50%)",
+            marginLeft: -rippleSize / 2,
+            marginTop: -rippleSize / 2,
             border: light
-              ? "1px solid rgba(255,255,255,0.22)"
-              : "1px solid rgba(108,2,34,0.14)",
+              ? "1px solid rgba(255,255,255,0.25)"
+              : "1px solid rgba(108,2,34,0.15)",
           }}
           animate={{
-            scale: [0.92, 1.4, 0.92],
-            opacity: [0.5, 0, 0.5],
+            scale: [0.92, 1.42, 0.92],
+            opacity: [0.55, 0, 0.55],
           }}
           transition={{
             duration: 2.4,
@@ -173,7 +179,7 @@ export function BrandLoader({
             repeat: Infinity,
             ease: [0.4, 0, 0.2, 1],
           }}
-          className="w-full h-auto flex items-center justify-center filter drop-shadow-[0_4px_14px_rgba(108,2,34,0.12)]"
+          className="w-full h-full flex items-center justify-center filter drop-shadow-[0_4px_14px_rgba(108,2,34,0.12)]"
         >
           <Image
             src={
@@ -182,9 +188,9 @@ export function BrandLoader({
                 : "/brand/logos/emblem-intact.png"
             }
             alt="Rastah emblem"
-            width={433}
-            height={808}
-            className="w-full h-auto object-contain"
+            width={481}
+            height={844}
+            className="w-full h-full object-contain"
             priority
           />
         </motion.div>
