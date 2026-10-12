@@ -5,6 +5,7 @@
  */
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
 export async function createClient() {
@@ -34,29 +35,16 @@ export async function createClient() {
 
 /**
  * Admin client using the service role key.
- * ONLY use server-side — never expose to the browser.
+ * ONLY use server-side - never expose to the browser.
+ *
+ * Deliberately a plain supabase-js client (no cookie session): with the SSR
+ * client the signed-in user's JWT replaces the service key, so requests run
+ * as the "authenticated" role and Row Level Security blocks admin writes.
  */
 export async function createAdminClient() {
-  const cookieStore = await cookies();
-
-  return createServerClient<Database>(
+  return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // ignore read-only context
-          }
-        },
-      },
-    }
+    { auth: { persistSession: false, autoRefreshToken: false } }
   );
 }
