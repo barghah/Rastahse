@@ -84,11 +84,22 @@ export async function getStockProducts(): Promise<StockProduct[]> {
   await requireAdmin();
   try {
     const admin = await createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (admin.from("db_products") as any)
-      .select("id, sku, title, stock")
-      .order("title");
-    return (data ?? []) as StockProduct[];
+    const [productsRes, overridesRes] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (admin.from("db_products") as any)
+        .select("id, sku, title, stock")
+        .order("title"),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (admin.from("product_overrides") as any)
+        .select("product_id, is_deleted")
+        .eq("is_deleted", true),
+    ]);
+
+    // Archived / deleted products must not be offered for restocking
+    const deletedIds = new Set<string>(
+      ((overridesRes.data ?? []) as Array<{ product_id: string }>).map((o) => o.product_id)
+    );
+    return ((productsRes.data ?? []) as StockProduct[]).filter((p) => !deletedIds.has(p.id));
   } catch {
     return [];
   }
