@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { getAllTags, searchProducts } from "@/lib/products";
+import { searchCatalog } from "@/actions/catalog";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/types/product";
 import Image from "next/image";
@@ -21,7 +21,6 @@ export function SearchBar({ open, onClose }: SearchBarProps) {
   const [prevOpen, setPrevOpen] = useState(open);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const allTags = getAllTags();
 
   // Reset when the bar closes (adjust state during render, not in an effect)
   if (open !== prevOpen) {
@@ -49,27 +48,26 @@ export function SearchBar({ open, onClose }: SearchBarProps) {
   useEffect(() => {
     if (!query.trim()) return;
 
-    const timer = setTimeout(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
       const q = query.trim();
-
-      // Tag autocomplete
-      if (q.startsWith("#") || q.length >= 2) {
-        const normalised = q.startsWith("#") ? q.slice(1) : q;
-        const matchingTags = allTags.filter((t) =>
-          t.toLowerCase().includes(normalised.toLowerCase())
-        );
-        setTagSuggestions(matchingTags.slice(0, 6));
-      } else {
-        setTagSuggestions([]);
+      try {
+        const { products, tags } = await searchCatalog(q);
+        if (cancelled) return;
+        setTagSuggestions(tags);
+        setResults(products);
+      } catch {
+        if (!cancelled) {
+          setTagSuggestions([]);
+          setResults([]);
+        }
       }
+    }, 200);
 
-      // Product search
-      const found = searchProducts(q);
-      setResults(found.slice(0, 5));
-    }, 150);
-
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   // Close on escape

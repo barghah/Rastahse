@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getProductsByTag, getAllTags } from "@/lib/products";
+import { getProductsByTag, getAllTags } from "@/lib/catalog";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionDivider, BackgroundMotif } from "@/components/brand/SectionDivider";
 import type { Metadata } from "next";
@@ -9,8 +9,10 @@ interface Props {
   params: Promise<{ tag: string }>;
 }
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  const tags = getAllTags();
+  const tags = await getAllTags();
   return tags.map((tag) => ({
     tag: tag.startsWith("#") ? tag.slice(1) : tag,
   }));
@@ -29,7 +31,7 @@ export default async function TagPage({ params }: Props) {
   const { tag } = await params;
   const decoded = decodeURIComponent(tag);
   const tagWithHash = decoded.startsWith("#") ? decoded : `#${decoded}`;
-  const products = getProductsByTag(tagWithHash);
+  const products = await getProductsByTag(tagWithHash);
 
   if (products.length === 0) {
     notFound();

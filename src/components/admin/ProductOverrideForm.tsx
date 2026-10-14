@@ -50,7 +50,7 @@ export function ProductOverrideForm({ product, override }: Props) {
   const [isPending, startTransition] = useTransition();
 
   // Image editing (only for admin-created / database products)
-  const canEditImages = product.variants?.[0]?.id === `${product.id}-variant`;
+  const canEditImages = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
   const MAX_IMAGES = 5;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgs, setImgs] = useState<Array<{ url: string; alt?: string }>>(

@@ -2,13 +2,16 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getCategoryBySlug, getProductsByCategory, getVisibleCategories } from "@/lib/products";
+import { getCategoryBySlug, getVisibleCategories } from "@/lib/products";
+import { getProductsByCategory } from "@/lib/catalog";
 import { ProductCard } from "@/components/product/ProductCard";
 import { SectionDivider, BackgroundMotif } from "@/components/brand/SectionDivider";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
+
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const categories = getVisibleCategories();
@@ -31,7 +34,7 @@ export default async function CategoryPage({ params }: Props) {
   const category = getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const products = getProductsByCategory(slug);
+  const products = await getProductsByCategory(slug);
   const otherCategories = getVisibleCategories().filter((c) => c.slug !== slug);
 
   return (

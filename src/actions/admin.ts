@@ -218,6 +218,7 @@ export async function upsertProductOverride(
     }
 
     revalidatePath("/admin/products");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (err) {
     return {

@@ -1,21 +1,22 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProductBySlug, getRelatedProducts, getPublicProducts } from "@/lib/products";
+import { getProductBySlug, getRelatedProducts, getPublicProducts } from "@/lib/catalog";
 import { ProductDetailView } from "@/components/product/ProductDetailView";
-import { createClient } from "@/lib/supabase/server";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  const products = getPublicProducts();
+  const products = await getPublicProducts();
   return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
 
   return {
@@ -31,39 +32,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const baseProduct = getProductBySlug(slug);
-  if (!baseProduct) notFound();
+  const product = await getProductBySlug(slug);
+  if (!product) notFound();
 
-  // Clone product so we don't mutate static JSON in memory
-  const product = { ...baseProduct };
-
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    try {
-      const supabase = await createClient();
-      const { data: override } = await supabase
-        .from("product_overrides")
-        .select("*")
-        .eq("product_id", product.id)
-        .maybeSingle();
-
-      if (override?.is_hidden || override?.is_deleted) {
-        notFound();
-      }
-      if (override?.price_override !== null && override?.price_override !== undefined) {
-        product.price = Number(override.price_override);
-      }
-      if (override?.description_override) {
-        product.description = override.description_override;
-      }
-      if (override?.in_stock === false && product.variants?.length > 0) {
-        product.variants = product.variants.map((v) => ({ ...v, stock: 0 }));
-      }
-    } catch {
-      // In case of transient network error, proceed with base product
-    }
-  }
-
-  const related = getRelatedProducts(product, 4);
+  const related = await getRelatedProducts(product, 4);
 
   return <ProductDetailView product={product} relatedProducts={related} />;
 }

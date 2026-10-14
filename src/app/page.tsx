@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getCuratedProducts, getVisibleCategories, getTrendingTags } from "@/lib/products";
+import { getVisibleCategories } from "@/lib/products";
+import { getCuratedProducts, getTrendingTags } from "@/lib/catalog";
 import { heroSection, brandStory, site, trendingHashtags } from "@content/site";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionDivider, BackgroundMotif } from "@/components/brand/SectionDivider";
@@ -13,10 +14,12 @@ export const metadata: Metadata = {
   description: site.description,
 };
 
-export default function HomePage() {
-  const curatedProducts = getCuratedProducts();
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const curatedProducts = await getCuratedProducts();
   const categories = getVisibleCategories();
-  const trending = getTrendingTags(8);
+  const trending = await getTrendingTags(8);
 
   return (
     <>
