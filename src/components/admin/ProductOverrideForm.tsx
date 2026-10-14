@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -9,6 +9,8 @@ import {
   deleteProduct,
   restoreProduct,
   toggleProductStock,
+  uploadProductImage,
+  updateProductImages,
   type ProductOverride,
 } from "@/actions/admin";
 import type { Product } from "@/types/product";
@@ -45,6 +47,73 @@ export function ProductOverrideForm({ product, override }: Props) {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Image editing (only for admin-created / database products)
+  const canEditImages = product.variants?.[0]?.id === `${product.id}-variant`;
+  const MAX_IMAGES = 5;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imgs, setImgs] = useState<Array<{ url: string; alt?: string }>>(
+    product.images ?? []
+  );
+  const [imgDirty, setImgDirty] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleAddImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).filter((f) =>
+      f.type.startsWith("image/")
+    );
+    e.target.value = "";
+    if (files.length === 0) return;
+
+    const sku = product.variants?.find((v) => v.sku)?.sku ?? "product";
+    const slots = MAX_IMAGES - imgs.length;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setUploading(true);
+    const added: Array<{ url: string }> = [];
+    for (const file of files.slice(0, slots)) {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("sku", sku);
+      const res = await uploadProductImage(fd);
+      if (res.success && res.url) {
+        added.push({ url: res.url });
+      } else {
+        setErrorMsg(res.error ?? "Image upload failed.");
+        break;
+      }
+    }
+    setUploading(false);
+    if (added.length > 0) {
+      setImgs((prev) => [...prev, ...added]);
+      setImgDirty(true);
+    }
+  }
+
+  function removeImg(i: number) {
+    setImgs((prev) => prev.filter((_, idx) => idx !== i));
+    setImgDirty(true);
+  }
+
+  function makeMain(i: number) {
+    setImgs((prev) => [prev[i], ...prev.filter((_, idx) => idx !== i)]);
+    setImgDirty(true);
+  }
+
+  function saveImages() {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    startTransition(async () => {
+      const res = await updateProductImages(product.id, imgs, product.name);
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to save images.");
+      } else {
+        setImgDirty(false);
+        setSuccessMsg("Images updated");
+        router.refresh();
+      }
+    });
+  }
 
   const hasPriceOverride = override?.price_override !== undefined;
 
@@ -462,6 +531,74 @@ export function ProductOverrideForm({ product, override }: Props) {
               className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-paper border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all resize-none"
             />
           </div>
+
+          {/* Product images */}
+          {canEditImages && (
+            <div>
+              <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                Product Images <span className="text-ink/35 normal-case font-normal">· first image is the main one · up to {MAX_IMAGES}</span>
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {imgs.map((img, i) => (
+                  <div
+                    key={`${img.url}-${i}`}
+                    className="relative w-20 h-20 rounded-[10px] overflow-hidden border border-brand bg-surface group"
+                  >
+                    <Image src={img.url} alt={`Image ${i + 1}`} fill className="object-cover" />
+                    {i === 0 ? (
+                      <div className="absolute bottom-0 left-0 right-0 bg-berry/80 py-0.5 text-center">
+                        <span className="font-label text-[8px] text-paper uppercase tracking-wider">Main</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => makeMain(i)}
+                        className="absolute bottom-0 left-0 right-0 bg-ink/70 py-0.5 text-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      >
+                        <span className="font-label text-[8px] text-paper uppercase tracking-wider">Set main</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImg(i)}
+                      className="absolute top-1 right-1 w-5 h-5 bg-red-600 hover:bg-red-700 text-paper rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                {imgs.length < MAX_IMAGES && (
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-20 h-20 rounded-[10px] border-2 border-dashed border-brand hover:border-ink/30 bg-surface/30 hover:bg-surface flex items-center justify-center text-ink/40 hover:text-ink/70 transition-all cursor-pointer text-xl disabled:opacity-50"
+                  >
+                    {uploading ? <span className="text-xs animate-pulse">⏳</span> : "+"}
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleAddImages}
+                  className="hidden"
+                />
+              </div>
+              {imgDirty && (
+                <button
+                  type="button"
+                  onClick={saveImages}
+                  disabled={isPending || uploading}
+                  className="mt-3 px-5 py-2 bg-ink text-paper font-label text-[10px] uppercase tracking-widest rounded-[10px] hover:bg-ink/85 disabled:opacity-50 transition-all cursor-pointer font-medium"
+                >
+                  {isPending ? "Saving…" : "Save Images"}
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between pt-2">
             <p className="font-body text-xs text-ink/45">
