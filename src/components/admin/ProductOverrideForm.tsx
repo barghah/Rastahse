@@ -11,6 +11,7 @@ import {
   toggleProductStock,
   uploadProductImage,
   updateProductImages,
+  updateProductName,
   type ProductOverride,
 } from "@/actions/admin";
 import type { Product } from "@/types/product";
@@ -110,6 +111,22 @@ export function ProductOverrideForm({ product, override }: Props) {
       } else {
         setImgDirty(false);
         setSuccessMsg("Images updated");
+        router.refresh();
+      }
+    });
+  }
+
+  const [nameStr, setNameStr] = useState(product.name);
+
+  function saveName() {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    startTransition(async () => {
+      const res = await updateProductName(product.id, nameStr);
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to rename product.");
+      } else {
+        setSuccessMsg("Name updated");
         router.refresh();
       }
     });
@@ -531,6 +548,31 @@ export function ProductOverrideForm({ product, override }: Props) {
               className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-paper border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all resize-none"
             />
           </div>
+
+          {/* Product name */}
+          {canEditImages && (
+            <div>
+              <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                Product Name
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nameStr}
+                  onChange={(e) => setNameStr(e.target.value)}
+                  className="flex-1 px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-paper border border-brand outline-none focus:border-berry transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={saveName}
+                  disabled={isPending || !nameStr.trim() || nameStr.trim() === product.name}
+                  className="px-4 py-2 bg-ink text-paper font-label text-[10px] uppercase tracking-widest rounded-[10px] hover:bg-ink/85 disabled:opacity-40 transition-all cursor-pointer font-medium"
+                >
+                  Rename
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Product images */}
           {canEditImages && (

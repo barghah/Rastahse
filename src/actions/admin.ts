@@ -532,6 +532,35 @@ export async function uploadProductImage(
   }
 }
 
+export async function updateProductName(
+  productId: string,
+  title: string
+): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
+  try {
+    const clean = title.trim();
+    if (!clean) return { success: false, error: "Product name cannot be empty." };
+
+    const admin = await createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from("db_products") as any)
+      .update({ title: clean })
+      .eq("id", productId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/admin/products");
+    revalidatePath("/admin/accounting");
+    revalidatePath("/shop");
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to rename product.",
+    };
+  }
+}
+
 export async function updateProductImages(
   productId: string,
   images: Array<{ url: string; alt?: string }>,
