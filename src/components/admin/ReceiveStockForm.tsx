@@ -36,7 +36,20 @@ export function ReceiveStockForm({ products }: { products: StockProduct[] }) {
   const [stockPending, startStock] = useTransition();
 
   const totalStockCost = (parseFloat(qty) || 0) * (parseFloat(unitCost) || 0);
-  const selectedProduct = products.find((p) => p.id === productId);
+
+  // Product search: filters the dropdown by name or SKU
+  const [search, setSearch] = useState("");
+  const needle = search.trim().toLowerCase();
+  const filteredProducts = needle
+    ? products.filter(
+        (p) => p.title.toLowerCase().includes(needle) || p.sku.toLowerCase().includes(needle)
+      )
+    : products;
+  // If the chosen product is filtered out, fall back to the first match
+  const effectiveProductId = filteredProducts.some((p) => p.id === productId)
+    ? productId
+    : filteredProducts[0]?.id ?? "";
+  const selectedProduct = products.find((p) => p.id === effectiveProductId);
 
   // ── Expense State ──
   const [expenseCategory, setExpenseCategory] = useState<ExpenseCategory>("other_expense");
@@ -52,12 +65,13 @@ export function ReceiveStockForm({ products }: { products: StockProduct[] }) {
     setStockMsg(null);
     const q = parseInt(qty, 10);
     const c = parseFloat(unitCost);
+    if (!effectiveProductId) return setStockMsg({ ok: false, text: "Select a product first." });
     if (!q || q < 1) return setStockMsg({ ok: false, text: "Enter a quantity of at least 1." });
     if (isNaN(c) || c < 0) return setStockMsg({ ok: false, text: "Unit cost is required." });
 
     startStock(async () => {
       const res = await addInventoryStock({
-        productId,
+        productId: effectiveProductId,
         qty: q,
         unitCost: c,
         onCredit: stockOnCredit,
@@ -149,13 +163,35 @@ export function ReceiveStockForm({ products }: { products: StockProduct[] }) {
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2">
                   <label className={label}>Product</label>
-                  <select value={productId} onChange={(e) => setProductId(e.target.value)} className={input}>
-                    {products.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.sku} — {p.title} (stock {p.stock})
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className={`${input} mb-2`}
+                    placeholder="Search by name or SKU…"
+                  />
+                  {filteredProducts.length === 0 ? (
+                    <p className="font-body text-xs text-red-600 py-1">
+                      No products match &ldquo;{search}&rdquo;.
+                    </p>
+                  ) : (
+                    <select
+                      value={effectiveProductId}
+                      onChange={(e) => setProductId(e.target.value)}
+                      className={input}
+                    >
+                      {filteredProducts.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.sku} — {p.title} (stock {p.stock})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {needle && filteredProducts.length > 0 && (
+                    <p className="font-body text-[11px] text-ink/45 mt-1">
+                      {filteredProducts.length} of {products.length} products
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className={label}>Quantity</label>
