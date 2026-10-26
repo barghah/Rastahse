@@ -31,15 +31,23 @@ export interface ProductImage {
 export interface ProductVariant {
   id: string;
   name: string;
-  sku?: string;
-  stock: number;
+  sku: string;
+  stock: number; // Available stock (total - withheld)
+  totalStock?: number;
+  withheldStock?: number;
+  availableStock?: number;
+  priceDelta?: number;
   lowStockThreshold: number;
+  weightGrams?: number | null;
 }
 
 export interface Product {
   id: string;
+  sku: string;
   slug: string;
   name: string;
+  origin?: string;
+  artisanName?: string;
   description: string;
   /** "Why we picked this" story */
   story: string;
@@ -47,9 +55,19 @@ export interface Product {
   /** Price in paise (rupees × 100) */
   price: number;
   /** Compare-at price in paise (for strikethrough) */
-  comparePrice?: number;
-  categorySlug: CategorySlug;
+  comparePrice?: number | null;
+  costPrice?: number | null;
+  gstRate?: number;
+  hsnCode?: string | null;
+  barcode?: string | null;
+  weightGrams?: number | null;
+  lengthCm?: number | null;
+  breadthCm?: number | null;
+  heightCm?: number | null;
+  categorySlug: CategorySlug | string;
+  categoryId?: string | null;
   tags: string[];
+  status?: "draft" | "active" | "archived";
   images: ProductImage[];
   variants: ProductVariant[];
   curated: boolean;
@@ -57,7 +75,6 @@ export interface Product {
   visible: boolean;
   /** One-of-a-kind item flag */
   oneOfOne: boolean;
-  origin?: string;
   createdAt: string;
   updatedAt?: string;
 }

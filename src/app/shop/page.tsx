@@ -11,11 +11,15 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function ShopPage() {
-  const [allProducts, allTags] = await Promise.all([getPublicProducts(), getAllTags()]);
+  const [allProducts, allTags, categories] = await Promise.all([
+    getPublicProducts(),
+    getAllTags(),
+    getVisibleCategories(),
+  ]);
   return (
     <ShopClient
       allProducts={allProducts}
-      categories={getVisibleCategories()}
+      categories={categories}
       allTags={allTags}
     />
   );

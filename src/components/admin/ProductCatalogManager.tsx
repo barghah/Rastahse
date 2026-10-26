@@ -98,11 +98,12 @@ export function ProductCatalogManager({ allProducts, overrides }: Props) {
         const matchesName = product.name.toLowerCase().includes(q);
         const matchesCategory = product.categorySlug?.toLowerCase().includes(q);
         const matchesTag = product.tags?.some((t) => t.toLowerCase().includes(q));
-        // Also match by variant SKU / product code
-        const matchesSku = product.variants?.some(
-          (v) => v.sku?.toLowerCase().includes(q)
-        ) || product.id.toLowerCase().includes(q);
-        if (!matchesName && !matchesCategory && !matchesTag && !matchesSku) return false;
+        // Also match by primary SKU, variant SKU, or barcode
+        const matchesSku = (product.sku && product.sku.toLowerCase().includes(q)) ||
+          product.variants?.some((v) => v.sku?.toLowerCase().includes(q)) ||
+          product.id.toLowerCase().includes(q);
+        const matchesBarcode = product.barcode ? product.barcode.toLowerCase().includes(q) : false;
+        if (!matchesName && !matchesCategory && !matchesTag && !matchesSku && !matchesBarcode) return false;
       }
 
       return true;

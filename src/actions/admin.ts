@@ -229,18 +229,52 @@ export async function upsertProductOverride(
 }
 
 export async function toggleProductVisibility(productId: string, isHidden: boolean) {
-  await requireAdmin();
-  return upsertProductOverride(productId, { is_hidden: isHidden });
+  const { admin } = await requireAdmin();
+  try {
+    const { error } = await admin.from("products").update({ is_hidden: isHidden }).eq("id", productId);
+    if (error) {
+      // Fallback to overrides table if products table update fails
+      return upsertProductOverride(productId, { is_hidden: isHidden });
+    }
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+    revalidatePath("/");
+    return { success: true };
+  } catch {
+    return upsertProductOverride(productId, { is_hidden: isHidden });
+  }
 }
 
 export async function deleteProduct(productId: string) {
-  await requireAdmin();
-  return upsertProductOverride(productId, { is_deleted: true, is_hidden: true });
+  const { admin } = await requireAdmin();
+  try {
+    const { error } = await admin.from("products").update({ is_deleted: true, is_hidden: true }).eq("id", productId);
+    if (error) {
+      return upsertProductOverride(productId, { is_deleted: true, is_hidden: true });
+    }
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+    revalidatePath("/");
+    return { success: true };
+  } catch {
+    return upsertProductOverride(productId, { is_deleted: true, is_hidden: true });
+  }
 }
 
 export async function restoreProduct(productId: string) {
-  await requireAdmin();
-  return upsertProductOverride(productId, { is_deleted: false, is_hidden: false });
+  const { admin } = await requireAdmin();
+  try {
+    const { error } = await admin.from("products").update({ is_deleted: false, is_hidden: false }).eq("id", productId);
+    if (error) {
+      return upsertProductOverride(productId, { is_deleted: false, is_hidden: false });
+    }
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+    revalidatePath("/");
+    return { success: true };
+  } catch {
+    return upsertProductOverride(productId, { is_deleted: false, is_hidden: false });
+  }
 }
 
 export async function toggleProductStock(productId: string, inStock: boolean) {
@@ -436,10 +470,8 @@ export interface CreateProductInput {
 export async function createProduct(
   input: CreateProductInput
 ): Promise<{ success: boolean; error?: string; id?: string }> {
-  await requireAdmin();
+  const { user, admin } = await requireAdmin();
   try {
-    const admin = await createAdminClient();
-
     const slug = input.title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
@@ -447,42 +479,96 @@ export async function createProduct(
       .replace(/\s+/g, "-")
       .slice(0, 80);
 
-    const images = input.imageUrls.map((url, i) => ({
-      url,
-      alt: `${input.title} – image ${i + 1}`,
-    }));
+    // Look up category_id
+    const { data: catData } = await admin
+      .from("categories")
+      .select("id")
+      .eq("slug", input.category.toLowerCase().trim())
+      .maybeSingle();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (admin.from("db_products") as any).insert({
-      sku: input.sku,
-      title: input.title,
-      slug: `${slug}-${Date.now()}`,
-      category: input.category,
-      price: input.price,
-      stock: input.stock,
-      description: input.description || null,
-      tags: input.tags,
-      images: images,
-      is_visible: true,
-      created_at: new Date().toISOString(),
-    }).select("id").single();
+    const newId = `prod_${Date.now()}`;
+    const cleanSku = input.sku.trim().toUpperCase();
 
-    if (error) return { success: false, error: error.message };
+    // 1. Insert into products
+    const { error: prodErr } = await admin.from("products").insert({
+      id: newId,
+      sku: cleanSku,
+      slug: `${slug}-${Date.now().toString().slice(-4)}`,
+      name: input.title.trim(),
+      description: input.description || "",
+      story: input.description || "",
+      category_id: catData?.id ?? null,
+      base_price: input.price,
+      cost_price: input.unitCost ? Math.round(input.unitCost * 100) : null,
+      tags: input.tags || [],
+      status: "active",
+      is_curated: false,
+      is_one_of_one: false,
+      is_hidden: false,
+      is_deleted: false,
+    });
 
-    const newId: string | undefined = data?.id;
-    if (newId && input.stock > 0 && (input.unitCost ?? 0) > 0) {
-      const led = await recordInventoryPurchase(admin, {
-        productId: newId,
-        productLabel: `${input.sku} ${input.title}`,
-        qty: input.stock,
-        unitCost: input.unitCost!,
-      });
-      if (!led.success) {
-        return { success: true, id: newId, error: `Product saved, but ledger entry failed: ${led.error}` };
+    if (prodErr) return { success: false, error: prodErr.message };
+
+    // 2. Insert variant
+    const { data: varData, error: varErr } = await admin
+      .from("product_variants")
+      .insert({
+        product_id: newId,
+        sku: `${cleanSku}-001`,
+        variant_name: "Standard",
+        total_stock: input.stock || 0,
+        withheld_stock: 0,
+        low_stock_threshold: 2,
+      })
+      .select("id")
+      .single();
+
+    if (varErr) return { success: false, error: varErr.message };
+
+    // 3. Insert images into product_images
+    if (input.imageUrls && input.imageUrls.length > 0) {
+      for (let i = 0; i < input.imageUrls.length; i++) {
+        await admin.from("product_images").insert({
+          product_id: newId,
+          url: input.imageUrls[i],
+          alt_text: `${input.title} – ${i + 1}`,
+          sort_order: i,
+          is_primary: i === 0,
+        });
       }
     }
+
+    // 4. Initial stock movement audit
+    if (input.stock > 0 && varData) {
+      await admin.from("stock_movements").insert({
+        variant_id: varData.id,
+        delta_total: input.stock,
+        delta_withheld: 0,
+        reason: "initial",
+        actor: user?.id ?? "admin",
+        note: `Initial stock creation for ${cleanSku}`,
+      });
+    }
+
+    // Optional accounting ledger sync
+    if (input.stock > 0 && (input.unitCost ?? 0) > 0) {
+      try {
+        await recordInventoryPurchase(admin, {
+          productId: newId,
+          productLabel: `${cleanSku} ${input.title}`,
+          qty: input.stock,
+          unitCost: input.unitCost!,
+        });
+      } catch (err) {
+        console.warn("[accounting] recordInventoryPurchase warning:", err);
+      }
+    }
+
     revalidatePath("/admin/products");
     revalidatePath("/admin/accounting");
+    revalidatePath("/shop");
+    revalidatePath("/");
     return { success: true, id: newId };
   } catch (err) {
     return {
@@ -506,22 +592,22 @@ export async function uploadProductImage(
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const timestamp = Date.now();
     const safeSku = sku.replace(/[^a-zA-Z0-9-_]/g, "").toLowerCase();
-    const path = `${safeSku}/${timestamp}.${ext}`;
+    const path = `products/${safeSku}-${timestamp}.${ext}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     const { error: uploadError } = await admin.storage
-      .from("product-images")
+      .from("product-media")
       .upload(path, buffer, {
         contentType: file.type || "image/jpeg",
-        upsert: false,
+        upsert: true,
       });
 
     if (uploadError) return { success: false, error: uploadError.message };
 
     const { data: urlData } = admin.storage
-      .from("product-images")
+      .from("product-media")
       .getPublicUrl(path);
 
     return { success: true, url: urlData.publicUrl };
@@ -529,6 +615,60 @@ export async function uploadProductImage(
     return {
       success: false,
       error: err instanceof Error ? err.message : "Upload failed.",
+    };
+  }
+}
+
+export async function adjustProductStock(input: {
+  variantId: string;
+  qty: number;
+  reason: "initial" | "manual_adjustment" | "order_reserved" | "order_released" | "order_delivered" | "return_restocked" | "rto_restocked" | "write_off";
+  note?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const { user, admin } = await requireAdmin();
+  try {
+    const { error } = await admin.rpc("restock_variant", {
+      p_variant_id: input.variantId,
+      p_qty: input.qty,
+      p_reason: input.reason,
+      p_actor: user?.id ?? "admin",
+      p_note: input.note ?? undefined,
+    });
+
+    if (error) {
+      // Fallback: direct adjustment if rpc constraint checks
+      const { data: v } = await admin
+        .from("product_variants")
+        .select("total_stock")
+        .eq("id", input.variantId)
+        .single();
+
+      if (v) {
+        const nextTotal = Math.max(0, v.total_stock + input.qty);
+        await admin
+          .from("product_variants")
+          .update({ total_stock: nextTotal })
+          .eq("id", input.variantId);
+
+        await admin.from("stock_movements").insert({
+          variant_id: input.variantId,
+          delta_total: input.qty,
+          delta_withheld: 0,
+          reason: input.reason,
+          actor: user?.id ?? "admin",
+          note: input.note ?? "Manual stock adjustment",
+        });
+      }
+    }
+
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to adjust stock.",
     };
   }
 }

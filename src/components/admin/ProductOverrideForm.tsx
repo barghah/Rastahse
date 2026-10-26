@@ -12,6 +12,7 @@ import {
   uploadProductImage,
   updateProductImages,
   updateProductName,
+  adjustProductStock,
   type ProductOverride,
 } from "@/actions/admin";
 import type { Product } from "@/types/product";
@@ -49,8 +50,8 @@ export function ProductOverrideForm({ product, override }: Props) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Image editing (only for admin-created / database products)
-  const canEditImages = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
+  // All products are database-backed now
+  const canEditImages = true;
   const MAX_IMAGES = 5;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgs, setImgs] = useState<Array<{ url: string; alt?: string }>>(
@@ -58,6 +59,14 @@ export function ProductOverrideForm({ product, override }: Props) {
   );
   const [imgDirty, setImgDirty] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Stock Adjustment State
+  const [showAdjustStock, setShowAdjustStock] = useState(false);
+  const [adjustVariantId, setAdjustVariantId] = useState(product.variants?.[0]?.id ?? "");
+  const [adjustQty, setAdjustQty] = useState("");
+  const [adjustReason, setAdjustReason] = useState<"manual_adjustment" | "return_restocked" | "write_off">("manual_adjustment");
+  const [adjustNote, setAdjustNote] = useState("");
+  const [adjustPending, setAdjustPending] = useState(false);
 
   async function handleAddImages(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []).filter((f) =>
@@ -258,6 +267,44 @@ export function ProductOverrideForm({ product, override }: Props) {
     });
   }
 
+  async function handleStockAdjustment(e: React.FormEvent) {
+    e.preventDefault();
+    const qtyNum = parseInt(adjustQty, 10);
+    if (!qtyNum || isNaN(qtyNum) || qtyNum <= 0) {
+      setErrorMsg("Please enter a valid positive quantity.");
+      return;
+    }
+    const targetVariant = product.variants?.find((v) => v.id === adjustVariantId) || product.variants?.[0];
+    if (!targetVariant) {
+      setErrorMsg("No variant found for stock adjustment.");
+      return;
+    }
+
+    setAdjustPending(true);
+    setErrorMsg(null);
+    try {
+      const res = await adjustProductStock({
+        variantId: targetVariant.id,
+        qty: qtyNum,
+        reason: adjustReason,
+        note: adjustNote || undefined,
+      });
+      if (!res.success) {
+        setErrorMsg(res.error || "Failed to adjust stock.");
+      } else {
+        setSuccessMsg(`✓ Stock adjusted for ${targetVariant.sku || targetVariant.name} (+${qtyNum} units)`);
+        setAdjustQty("");
+        setAdjustNote("");
+        setShowAdjustStock(false);
+        router.refresh();
+      }
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Error adjusting stock");
+    } finally {
+      setAdjustPending(false);
+    }
+  }
+
   return (
     <div
       className={`rounded-[18px] border transition-all duration-200 overflow-hidden ${
@@ -360,12 +407,53 @@ export function ProductOverrideForm({ product, override }: Props) {
               )}
               <span>· {product.categorySlug}</span>
             </div>
+
+            {/* Stock Breakdown: TOTAL / WITHHELD / AVAILABLE */}
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              {product.variants?.map((v) => {
+                const total = v.totalStock ?? v.stock ?? 0;
+                const withheld = v.withheldStock ?? 0;
+                const available = v.availableStock ?? v.stock ?? 0;
+                return (
+                  <span
+                    key={v.id}
+                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[6px] bg-surface/70 border border-brand/60 font-mono text-[9.5px] text-ink/75"
+                  >
+                    <span className="font-semibold text-ink">{v.name}:</span>
+                    <span>Total <strong className="text-ink">{total}</strong></span>
+                    <span className="text-ink/20">/</span>
+                    <span className="text-amber-700">Reserved <strong>{withheld}</strong></span>
+                    <span className="text-ink/20">/</span>
+                    <span className="text-emerald-700 font-semibold">Available <strong>{available}</strong></span>
+                  </span>
+                );
+              })}
+            </div>
           </div>
 
         </div>
 
         {/* Right: Quick Action Controls */}
         <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-brand/50 justify-between sm:justify-end">
+          {/* Adjust Stock Button */}
+          {!isDeleted && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAdjustStock((s) => !s);
+              }}
+              title="Adjust inventory units and audit ledger"
+              className={`px-3 py-1.5 rounded-[10px] font-label text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer border ${
+                showAdjustStock
+                  ? "bg-berry text-paper border-berry shadow-xs"
+                  : "bg-surface hover:bg-surface/80 text-ink/70 border-brand hover:text-ink"
+              }`}
+            >
+              📦 Adjust
+            </button>
+          )}
+
           {/* Hide / Show Toggle Button */}
           {!isDeleted && (
             <button
@@ -477,6 +565,75 @@ export function ProductOverrideForm({ product, override }: Props) {
             ✕
           </button>
         </div>
+      )}
+
+      {/* ── Inline Stock Adjustment Drawer ── */}
+      {showAdjustStock && (
+        <form
+          onSubmit={handleStockAdjustment}
+          className="px-6 py-4 border-t border-brand bg-amber-50/50 flex flex-wrap items-center gap-3"
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-label text-[10px] uppercase tracking-wider text-ink/70 font-semibold">
+              Adjust Stock:
+            </span>
+            {product.variants && product.variants.length > 1 ? (
+              <select
+                value={adjustVariantId}
+                onChange={(e) => setAdjustVariantId(e.target.value)}
+                className="px-2.5 py-1.5 rounded-[8px] bg-paper border border-brand font-body text-xs text-ink"
+              >
+                {product.variants.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.name} ({v.sku})
+                  </option>
+                ))}
+              </select>
+            ) : null}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              type="number"
+              min="1"
+              placeholder="+ Qty"
+              value={adjustQty}
+              onChange={(e) => setAdjustQty(e.target.value)}
+              className="w-24 px-2.5 py-1.5 rounded-[8px] bg-paper border border-brand font-body text-xs text-ink placeholder:text-ink/30"
+              required
+            />
+            <select
+              value={adjustReason}
+              onChange={(e) => setAdjustReason(e.target.value as any)}
+              className="px-2.5 py-1.5 rounded-[8px] bg-paper border border-brand font-body text-xs text-ink"
+            >
+              <option value="manual_adjustment">Manual Correction</option>
+              <option value="return_restocked">Inspected Return</option>
+              <option value="write_off">Write-off / Restock</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Audit note (optional)"
+              value={adjustNote}
+              onChange={(e) => setAdjustNote(e.target.value)}
+              className="w-44 px-2.5 py-1.5 rounded-[8px] bg-paper border border-brand font-body text-xs text-ink placeholder:text-ink/30"
+            />
+            <button
+              type="submit"
+              disabled={adjustPending}
+              className="px-4 py-1.5 rounded-[8px] bg-ink text-paper font-label text-[10px] uppercase tracking-widest font-semibold hover:bg-ink/80 disabled:opacity-50 cursor-pointer shadow-xs"
+            >
+              {adjustPending ? "Updating…" : "Apply Adjustment"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAdjustStock(false)}
+              className="text-xs text-ink/40 hover:text-ink p-1 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </form>
       )}
 
       {/* ── Expandable Override Form ── */}

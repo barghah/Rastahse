@@ -17,9 +17,11 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const curatedProducts = await getCuratedProducts();
-  const categories = getVisibleCategories();
-  const trending = await getTrendingTags(8);
+  const [curatedProducts, categories, trending] = await Promise.all([
+    getCuratedProducts(),
+    getVisibleCategories(),
+    getTrendingTags(8),
+  ]);
 
   return (
     <>

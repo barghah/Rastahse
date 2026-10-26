@@ -14,13 +14,13 @@ interface Props {
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const categories = getVisibleCategories();
+  const categories = await getVisibleCategories();
   return categories.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) return { title: "Category Not Found" };
 
   return {
@@ -31,11 +31,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const products = await getProductsByCategory(slug);
-  const otherCategories = getVisibleCategories().filter((c) => c.slug !== slug);
+  const [products, allCategories] = await Promise.all([
+    getProductsByCategory(slug),
+    getVisibleCategories(),
+  ]);
+  const otherCategories = allCategories.filter((c) => c.slug !== slug);
 
   return (
     <div className="min-h-screen bg-paper pb-24">
