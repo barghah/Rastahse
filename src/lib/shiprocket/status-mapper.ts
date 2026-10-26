@@ -23,27 +23,78 @@ export function mapShiprocketStatus(rawStatus: string | number | undefined | nul
 
   const normalized = String(rawStatus).toUpperCase().trim();
 
-  // 1. Pending Pickup / Drop-off
-  // Shiprocket statuses: "AWB ASSIGNED", "LABEL GENERATED", "PICKUP SCHEDULED", "PICKUP QUEUED", "MANIFEST GENERATED"
-  if (
-    normalized.includes("PICKUP SCHEDULED") ||
-    normalized.includes("PICKUP GENERATED") ||
-    normalized.includes("PICKUP QUEUED") ||
-    normalized.includes("AWAITING PICKUP") ||
-    normalized.includes("MANIFEST GENERATED") ||
-    normalized.includes("LABEL GENERATED") ||
-    normalized.includes("AWB ASSIGNED") ||
-    normalized === "READY TO SHIP"
-  ) {
+  // 1. Cancelled
+  if (normalized.includes("CANCELLED") || normalized.includes("CANCELED")) {
     return {
-      deliveryStatus: "pending_dropoff",
+      deliveryStatus: "cancelled",
       needsAttention: false,
-      statusLabel: "Pending drop-off",
+      statusLabel: "Cancelled",
     };
   }
 
-  // 2. In Transit / Out for delivery
-  // Shiprocket statuses: "PICKED UP", "IN TRANSIT", "OUT FOR DELIVERY", "REACHED AT DESTINATION", "HUB"
+  // 2. RTO Delivered / Returned (must be before forward Delivered)
+  if (
+    normalized.includes("RTO DELIVERED") ||
+    normalized.includes("RETURNED TO ORIGIN") ||
+    normalized.includes("RETURN DELIVERED")
+  ) {
+    return {
+      deliveryStatus: "returned",
+      needsAttention: false,
+      statusLabel: "Returned",
+    };
+  }
+
+  // 3. RTO / Return in transit (must be before forward In Transit)
+  if (
+    normalized.includes("RTO") ||
+    normalized.includes("RETURN IN TRANSIT") ||
+    normalized.includes("RETURN INITIATED")
+  ) {
+    return {
+      deliveryStatus: "return_in_transit",
+      needsAttention: false,
+      statusLabel: "In transit (return)",
+    };
+  }
+
+  // 4. Undelivered / NDR (must be before forward Delivered)
+  if (
+    normalized.includes("UNDELIVERED") ||
+    normalized.includes("NDR") ||
+    normalized.includes("ATTEMPTED") ||
+    normalized.includes("DELIVERY FAILED")
+  ) {
+    return {
+      deliveryStatus: "retrying",
+      needsAttention: false,
+      statusLabel: "Retrying (NDR)",
+    };
+  }
+
+  // 5. Delivered
+  if (normalized.includes("DELIVERED")) {
+    return {
+      deliveryStatus: "delivered",
+      needsAttention: false,
+      statusLabel: "Delivered",
+    };
+  }
+
+  // 6. Lost / Damaged / Unknown issue
+  if (
+    normalized.includes("LOST") ||
+    normalized.includes("DAMAGED") ||
+    normalized.includes("DESTROYED")
+  ) {
+    return {
+      deliveryStatus: "in_transit",
+      needsAttention: true,
+      statusLabel: `Courier Attention Required (${rawStatus})`,
+    };
+  }
+
+  // 7. In Transit / Out for delivery / Reached hub
   if (
     normalized.includes("PICKED UP") ||
     normalized.includes("IN TRANSIT") ||
@@ -58,75 +109,18 @@ export function mapShiprocketStatus(rawStatus: string | number | undefined | nul
     };
   }
 
-  // 3. Delivered
-  if (normalized.includes("DELIVERED") && !normalized.includes("RTO")) {
-    return {
-      deliveryStatus: "delivered",
-      needsAttention: false,
-      statusLabel: "Delivered",
-    };
-  }
-
-  // 4. Undelivered / NDR (Non-delivery report)
+  // 8. Pending Pickup / Drop-off
   if (
-    normalized.includes("UNDELIVERED") ||
-    normalized.includes("NDR") ||
-    normalized.includes("ATTEMPTED") ||
-    normalized.includes("DELIVERY FAILED")
+    normalized.includes("PICKUP") ||
+    normalized.includes("MANIFEST") ||
+    normalized.includes("LABEL") ||
+    normalized.includes("AWB") ||
+    normalized === "READY TO SHIP"
   ) {
     return {
-      deliveryStatus: "retrying",
+      deliveryStatus: "pending_dropoff",
       needsAttention: false,
-      statusLabel: "Retrying (NDR)",
-    };
-  }
-
-  // 5. RTO in transit
-  if (
-    normalized.includes("RTO IN TRANSIT") ||
-    normalized.includes("RTO INITIATED") ||
-    normalized.includes("RETURN IN TRANSIT") ||
-    normalized.includes("RTO OFD")
-  ) {
-    return {
-      deliveryStatus: "return_in_transit",
-      needsAttention: false,
-      statusLabel: "In transit (return)",
-    };
-  }
-
-  // 6. RTO Delivered / Returned
-  if (
-    normalized.includes("RTO DELIVERED") ||
-    normalized.includes("RETURNED TO ORIGIN") ||
-    normalized.includes("RETURN DELIVERED")
-  ) {
-    return {
-      deliveryStatus: "returned",
-      needsAttention: false,
-      statusLabel: "Returned",
-    };
-  }
-
-  // 7. Cancelled
-  if (normalized.includes("CANCELLED") || normalized.includes("CANCELED")) {
-    return {
-      deliveryStatus: "cancelled",
-      needsAttention: false,
-      statusLabel: "Cancelled",
-    };
-  }
-
-  // 8. Lost / Damaged / Unknown
-  if (
-    normalized.includes("LOST") ||
-    normalized.includes("DAMAGED") ||
-    normalized.includes("DESTROYED")
-  ) {
-    return {
-      deliveryStatus: "in_transit",
-      needsAttention: true,
-      statusLabel: `Courier Attention Required (${rawStatus})`,
+      statusLabel: "Pending drop-off",
     };
   }
 
