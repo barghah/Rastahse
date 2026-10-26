@@ -1,0 +1,101 @@
+-- ==============================================================================
+-- Rastahse Staging Seed Data: Realistic Demo Orders
+-- ==============================================================================
+
+INSERT INTO orders (
+  id,
+  created_at,
+  email,
+  phone,
+  status,
+  items,
+  subtotal,
+  shipping_fee,
+  total,
+  shipping_address,
+  razorpay_order_id,
+  razorpay_payment_id,
+  tracking_number,
+  notes
+) VALUES
+(
+  '46f97fc3-1122-4a55-8899-aabbccddeeff',
+  NOW() - INTERVAL '2 hours',
+  'rohan.verma@example.com',
+  '+91 98765 43210',
+  'paid',
+  '[{"id": "prod_002", "name": "Koodai Bag", "price": 185000, "qty": 1, "image": "http://localhost:8000/storage/v1/object/public/product-media/products/p2_koodai-bag.jpeg"}, {"id": "prod_003", "name": "Hand-Bound Leather Journal", "price": 145000, "qty": 1, "image": "http://localhost:8000/storage/v1/object/public/product-media/products/p3_leather-journal.jpeg"}]'::jsonb,
+  3300,
+  0,
+  3300,
+  '{"name": "Rohan Verma", "line1": "Flat 402, Shanti Niketan", "line2": "100ft Road, Indiranagar", "city": "Bengaluru", "state": "Karnataka", "pincode": "560038"}'::jsonb,
+  'order_OXYZ12345678',
+  'pay_PXYZ87654321',
+  NULL,
+  'Please leave package with building security if unattended.'
+),
+(
+  '7a9b11c2-3344-4b66-9900-ccddeeff0011',
+  NOW() - INTERVAL '5 hours',
+  'meera.nambiar@example.com',
+  '+91 98451 22334',
+  'pending',
+  '[{"id": "prod_030", "name": "Hand-Thrown Ceramic Dinner Plate", "price": 185000, "qty": 1, "image": "http://localhost:8000/storage/v1/object/public/product-media/products/p30_ceramic-dinner-plate.jpeg"}]'::jsonb,
+  1850,
+  150,
+  2000,
+  '{"name": "Meera Nambiar", "line1": "House No. 12, Panampilly Nagar", "city": "Kochi", "state": "Kerala", "pincode": "682036"}'::jsonb,
+  NULL,
+  NULL,
+  NULL,
+  'Cash on Delivery order — please confirm before dispatch.'
+),
+(
+  '88df4201-5566-4c77-aa11-ddeeff001122',
+  NOW() - INTERVAL '1 day',
+  'priya.sharma@example.com',
+  '+91 97112 33445',
+  'shipped',
+  '[{"id": "prod_016", "name": "Indo-Persian Embroidered Silk Bandana", "price": 240000, "qty": 2, "image": "http://localhost:8000/storage/v1/object/public/product-media/products/p16_embroidered-bandana.jpeg"}]'::jsonb,
+  4800,
+  0,
+  4800,
+  '{"name": "Priya Sharma", "line1": "B-14, Sea Face Apartments", "city": "Mumbai", "state": "Maharashtra", "pincode": "400050"}'::jsonb,
+  'order_OMUM99887766',
+  'pay_PMUM66778899',
+  'SR-98721455IN',
+  'Gift wrapped for anniversary.'
+),
+(
+  '31b99a04-7788-4d88-bb22-eeff00112233',
+  NOW() - INTERVAL '3 days',
+  'arjun.kapoor@example.com',
+  '+91 99100 88776',
+  'delivered',
+  '[{"id": "prod_023", "name": "Authentic Handspun Pashmina Shawl", "price": 850000, "qty": 1, "image": "http://localhost:8000/storage/v1/object/public/product-media/products/p23_pashmina-shawl.png"}]'::jsonb,
+  8500,
+  0,
+  8500,
+  '{"name": "Arjun Kapoor", "line1": "45, Golf Links", "city": "New Delhi", "state": "Delhi", "pincode": "110003"}'::jsonb,
+  'order_ODEL55443322',
+  'pay_PDEL22334455',
+  'SR-55441122IN',
+  'Delivered to recipient.'
+),
+(
+  '12c09881-9900-4e99-cc33-ff0011223344',
+  NOW() - INTERVAL '4 days',
+  'vikram.das@example.com',
+  '+91 94330 11223',
+  'cancelled',
+  '[{"id": "prod_021", "name": "Kerala Aranmula Hand Mirror", "price": 210000, "qty": 1, "image": "http://localhost:8000/storage/v1/object/public/product-media/products/p21_hand-mirror.png"}]'::jsonb,
+  2100,
+  150,
+  2250,
+  '{"name": "Vikram Das", "line1": "18/2, Ballygunge Circular Rd", "city": "Kolkata", "state": "West Bengal", "pincode": "700019"}'::jsonb,
+  'order_OKOL11223344',
+  'pay_PKOL44332211',
+  NULL,
+  'Customer requested cancellation before courier dispatch.'
+)
+ON CONFLICT (id) DO NOTHING;

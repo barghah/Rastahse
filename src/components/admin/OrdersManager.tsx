@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { seedDemoOrdersAction } from "@/actions/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,9 +80,18 @@ function getAddr(order: Order): { name?: string; city?: string } | null {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function OrdersManager({ orders }: Props) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
   const [deliveryFilter, setDeliveryFilter] = useState<DeliveryFilter>("all");
+  const [isSeeding, startSeed] = useTransition();
+
+  function handleSeedDemoOrders() {
+    startSeed(async () => {
+      await seedDemoOrdersAction();
+      router.refresh();
+    });
+  }
 
   const filtered = useMemo(() => {
     let result = orders;
@@ -213,22 +224,40 @@ export function OrdersManager({ orders }: Props) {
         )}
       </div>
 
-      {/* ── Count ── */}
+      {/* ── Count & Quick Seed ── */}
       <div className="flex items-center justify-between px-1">
         <p className="font-body text-xs text-ink/45">
           Showing <strong className="text-ink font-semibold">{filtered.length}</strong> of{" "}
           <strong className="text-ink font-semibold">{orders.length}</strong> orders
         </p>
+
+        <button
+          type="button"
+          onClick={handleSeedDemoOrders}
+          disabled={isSeeding}
+          className="font-label text-[10px] text-berry hover:text-[#580118] uppercase tracking-wider font-semibold cursor-pointer disabled:opacity-40"
+        >
+          {isSeeding ? "Loading Demo Orders…" : "✨ Reload Demo Orders"}
+        </button>
       </div>
 
       {/* ── Table ── */}
       {filtered.length === 0 ? (
-        <div className="rounded-[18px] p-12 text-center bg-paper border border-brand shadow-soft">
+        <div className="rounded-[18px] p-12 text-center bg-paper border border-brand shadow-soft space-y-3">
           <p className="font-body text-sm text-ink/40">No orders match the current filters.</p>
-          {search && (
+          {search ? (
             <p className="font-body text-xs text-ink/30 mt-1">
               Try searching by a different term.
             </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSeedDemoOrders}
+              disabled={isSeeding}
+              className="mt-2 px-4 py-2 rounded-[10px] bg-berry text-paper font-label text-[10.5px] uppercase tracking-wider font-semibold shadow-xs hover:bg-[#580118] disabled:opacity-50 cursor-pointer"
+            >
+              {isSeeding ? "Seeding Orders…" : "✨ Load Sample Staging Orders"}
+            </button>
           )}
         </div>
       ) : (

@@ -430,6 +430,109 @@ export async function getAdminCustomers(): Promise<AdminCustomer[]> {
 }
 
 // ─── Contact Messages ─────────────────────────────────────────────────────────
+export async function seedDemoOrdersAction(): Promise<{ success: boolean; count?: number; error?: string }> {
+  const { admin } = await requireAdmin();
+  try {
+    const demoOrders = [
+      {
+        id: "46f97fc3-1122-4a55-8899-aabbccddeeff",
+        email: "rohan.verma@example.com",
+        phone: "+91 98765 43210",
+        status: "paid" as const,
+        items: [
+          { id: "prod_002", name: "Koodai Bag", price: 185000, qty: 1, image: "http://localhost:8000/storage/v1/object/public/product-media/products/p2_koodai-bag.jpeg" },
+          { id: "prod_003", name: "Hand-Bound Leather Journal", price: 145000, qty: 1, image: "http://localhost:8000/storage/v1/object/public/product-media/products/p3_leather-journal.jpeg" }
+        ],
+        subtotal: 3300,
+        shipping_fee: 0,
+        total: 3300,
+        shipping_address: { name: "Rohan Verma", line1: "Flat 402, Shanti Niketan", line2: "100ft Road, Indiranagar", city: "Bengaluru", state: "Karnataka", pincode: "560038" },
+        razorpay_order_id: "order_OXYZ12345678",
+        razorpay_payment_id: "pay_PXYZ87654321",
+        notes: "Please leave package with building security if unattended."
+      },
+      {
+        id: "7a9b11c2-3344-4b66-9900-ccddeeff0011",
+        email: "meera.nambiar@example.com",
+        phone: "+91 98451 22334",
+        status: "pending" as const,
+        items: [
+          { id: "prod_030", name: "Hand-Thrown Ceramic Dinner Plate", price: 185000, qty: 1, image: "http://localhost:8000/storage/v1/object/public/product-media/products/p30_ceramic-dinner-plate.jpeg" }
+        ],
+        subtotal: 1850,
+        shipping_fee: 150,
+        total: 2000,
+        shipping_address: { name: "Meera Nambiar", line1: "House No. 12, Panampilly Nagar", city: "Kochi", state: "Kerala", pincode: "682036" },
+        notes: "Cash on Delivery order — please confirm before dispatch."
+      },
+      {
+        id: "88df4201-5566-4c77-aa11-ddeeff001122",
+        email: "priya.sharma@example.com",
+        phone: "+91 97112 33445",
+        status: "shipped" as const,
+        items: [
+          { id: "prod_016", name: "Indo-Persian Embroidered Silk Bandana", price: 240000, qty: 2, image: "http://localhost:8000/storage/v1/object/public/product-media/products/p16_embroidered-bandana.jpeg" }
+        ],
+        subtotal: 4800,
+        shipping_fee: 0,
+        total: 4800,
+        shipping_address: { name: "Priya Sharma", line1: "B-14, Sea Face Apartments", city: "Mumbai", state: "Maharashtra", pincode: "400050" },
+        razorpay_order_id: "order_OMUM99887766",
+        razorpay_payment_id: "pay_PMUM66778899",
+        tracking_number: "SR-98721455IN",
+        notes: "Gift wrapped for anniversary."
+      },
+      {
+        id: "31b99a04-7788-4d88-bb22-eeff00112233",
+        email: "arjun.kapoor@example.com",
+        phone: "+91 99100 88776",
+        status: "delivered" as const,
+        items: [
+          { id: "prod_023", name: "Authentic Handspun Pashmina Shawl", price: 850000, qty: 1, image: "http://localhost:8000/storage/v1/object/public/product-media/products/p23_pashmina-shawl.png" }
+        ],
+        subtotal: 8500,
+        shipping_fee: 0,
+        total: 8500,
+        shipping_address: { name: "Arjun Kapoor", line1: "45, Golf Links", city: "New Delhi", state: "Delhi", pincode: "110003" },
+        razorpay_order_id: "order_ODEL55443322",
+        razorpay_payment_id: "pay_PDEL22334455",
+        tracking_number: "SR-55441122IN",
+        notes: "Delivered to recipient."
+      },
+      {
+        id: "12c09881-9900-4e99-cc33-ff0011223344",
+        email: "vikram.das@example.com",
+        phone: "+91 94330 11223",
+        status: "cancelled" as const,
+        items: [
+          { id: "prod_021", name: "Kerala Aranmula Hand Mirror", price: 210000, qty: 1, image: "http://localhost:8000/storage/v1/object/public/product-media/products/p21_hand-mirror.png" }
+        ],
+        subtotal: 2100,
+        shipping_fee: 150,
+        total: 2250,
+        shipping_address: { name: "Vikram Das", line1: "18/2, Ballygunge Circular Rd", city: "Kolkata", state: "West Bengal", pincode: "700019" },
+        razorpay_order_id: "order_OKOL11223344",
+        razorpay_payment_id: "pay_PKOL44332211",
+        notes: "Customer requested cancellation before courier dispatch."
+      }
+    ];
+
+    for (const ord of demoOrders) {
+      await admin.from("orders").upsert({
+        ...ord,
+        items: ord.items as any,
+        shipping_address: ord.shipping_address as any,
+      }, { onConflict: "id" });
+    }
+
+    revalidatePath("/admin/orders");
+    revalidatePath("/admin");
+    return { success: true, count: demoOrders.length };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to seed demo orders" };
+  }
+}
+
 export async function getContactMessages() {
   await requireAdmin();
   const admin = await createAdminClient();
