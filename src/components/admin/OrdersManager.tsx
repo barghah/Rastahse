@@ -1,370 +1,509 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useTransition, useMemo } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { seedDemoOrdersAction } from "@/actions/admin";
+import type { AdminOrderSummary, AdminOrdersListResult } from "@/actions/orders-admin";
+import type { DeliveryStatus, PaymentStatus } from "@/lib/shiprocket/types";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Status Visual Mappings ───────────────────────────────────────────────────
 
-interface Order {
-  id: string;
-  created_at: string;
-  email: string;
-  phone: string | null;
-  status: string;
-  total: number;
-  items: unknown[];
-  shipping_address: unknown;
-  tracking_number: string | null;
-  razorpay_order_id: string | null;
-}
+const PAYMENT_BADGES: Record<PaymentStatus, { label: string; classes: string }> = {
+  paid: {
+    label: "Paid",
+    classes: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
+  },
+  cod: {
+    label: "COD",
+    classes: "bg-amber-50 text-amber-800 border-amber-200/80",
+  },
+  refunded: {
+    label: "Refunded",
+    classes: "bg-stone-100 text-stone-700 border-stone-200",
+  },
+  awaiting_payment: {
+    label: "Awaiting Payment",
+    classes: "bg-zinc-100 text-zinc-600 border-zinc-200",
+  },
+};
+
+const DELIVERY_BADGES: Record<
+  DeliveryStatus,
+  { label: string; classes: string; pickupLabel?: string }
+> = {
+  waiting_approval: {
+    label: "Waiting for approval",
+    classes: "bg-amber-50 text-amber-900 border-amber-300 font-medium",
+  },
+  pending_dropoff: {
+    label: "Pending drop-off",
+    pickupLabel: "Pending pickup",
+    classes: "bg-blue-50 text-blue-800 border-blue-200",
+  },
+  in_transit: {
+    label: "In transit",
+    classes: "bg-indigo-50 text-indigo-800 border-indigo-200",
+  },
+  delivered: {
+    label: "Delivered",
+    classes: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  },
+  retrying: {
+    label: "Retrying (NDR)",
+    classes: "bg-rose-50 text-rose-800 border-rose-300 font-medium animate-pulse",
+  },
+  returned: {
+    label: "Returned",
+    classes: "bg-rose-50 text-rose-800 border-rose-200",
+  },
+  return_in_transit: {
+    label: "In transit (return)",
+    classes: "bg-orange-50 text-orange-800 border-orange-200",
+  },
+  cancelled: {
+    label: "Cancelled",
+    classes: "bg-stone-100 text-stone-600 border-stone-200",
+  },
+};
+
+const PAYMENT_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "paid", label: "Paid" },
+  { key: "cod", label: "COD" },
+  { key: "refunded", label: "Refunded" },
+];
+
+const DELIVERY_FILTERS: { key: string; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "waiting_approval", label: "Waiting for approval" },
+  { key: "pending_dropoff", label: "Pending drop-off" },
+  { key: "in_transit", label: "In transit" },
+  { key: "delivered", label: "Delivered" },
+  { key: "retrying", label: "Retrying (NDR)" },
+  { key: "returned", label: "Returned" },
+  { key: "return_in_transit", label: "In transit (return)" },
+  { key: "cancelled", label: "Cancelled" },
+];
 
 interface Props {
-  orders: Order[];
+  initialData: AdminOrdersListResult;
+  searchParams: {
+    page?: string;
+    search?: string;
+    payment?: string;
+    delivery?: string;
+    needs_approval?: string;
+  };
 }
 
-// ─── Status Classification ────────────────────────────────────────────────────
-// We derive TWO logical statuses from the single `status` field:
-// Payment Status: pending | paid | cod | refunded
-// Delivery Stage: preprocessing | shipped | delivered | cancelled
-
-const PAYMENT_STATUS: Record<string, { label: string; classes: string }> = {
-  pending:    { label: "Pending",   classes: "bg-amber-50  text-amber-800  border-amber-200/80" },
-  paid:       { label: "Paid",      classes: "bg-blue-50   text-blue-800   border-blue-200/80" },
-  cod:        { label: "COD",       classes: "bg-violet-50 text-violet-800 border-violet-200" },
-  refunded:   { label: "Refunded",  classes: "bg-stone-100 text-stone-700  border-stone-200" },
-  processing: { label: "Paid",      classes: "bg-blue-50   text-blue-800   border-blue-200/80" },
-  shipped:    { label: "Paid",      classes: "bg-blue-50   text-blue-800   border-blue-200/80" },
-  delivered:  { label: "Paid",      classes: "bg-blue-50   text-blue-800   border-blue-200/80" },
-  cancelled:  { label: "Cancelled", classes: "bg-red-50    text-red-800    border-red-200/80" },
-};
-
-const DELIVERY_STATUS: Record<string, { label: string; classes: string }> = {
-  pending:    { label: "Pre-processing", classes: "bg-amber-50    text-amber-800    border-amber-200/80" },
-  paid:       { label: "Pre-processing", classes: "bg-amber-50    text-amber-800    border-amber-200/80" },
-  cod:        { label: "Pre-processing", classes: "bg-amber-50    text-amber-800    border-amber-200/80" },
-  processing: { label: "Pre-processing", classes: "bg-purple-50   text-purple-800   border-purple-200" },
-  shipped:    { label: "Out for Delivery",classes: "bg-indigo-50   text-indigo-800   border-indigo-200" },
-  delivered:  { label: "Delivered",      classes: "bg-emerald-50  text-emerald-800  border-emerald-200" },
-  cancelled:  { label: "Cancelled",      classes: "bg-red-50      text-red-800      border-red-200/80" },
-  refunded:   { label: "Cancelled",      classes: "bg-red-50      text-red-800      border-red-200/80" },
-};
-
-// Payment filter groups
-type PaymentFilter = "all" | "paid" | "pending" | "cod" | "refunded";
-const PAYMENT_FILTERS: { key: PaymentFilter; label: string; statuses: string[] }[] = [
-  { key: "all",      label: "All",       statuses: [] },
-  { key: "paid",     label: "Paid",      statuses: ["paid", "processing", "shipped", "delivered"] },
-  { key: "pending",  label: "Pending",   statuses: ["pending"] },
-  { key: "cod",      label: "COD",       statuses: ["cod"] },
-  { key: "refunded", label: "Refunded",  statuses: ["refunded"] },
-];
-
-// Delivery filter groups
-type DeliveryFilter = "all" | "preprocessing" | "shipped" | "delivered" | "cancelled";
-const DELIVERY_FILTERS: { key: DeliveryFilter; label: string; statuses: string[] }[] = [
-  { key: "all",           label: "All",               statuses: [] },
-  { key: "preprocessing", label: "Pre-processing",    statuses: ["pending", "paid", "cod", "processing"] },
-  { key: "shipped",       label: "Out for Delivery",  statuses: ["shipped"] },
-  { key: "delivered",     label: "Delivered",         statuses: ["delivered"] },
-  { key: "cancelled",     label: "Cancelled",         statuses: ["cancelled", "refunded"] },
-];
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function getAddr(order: Order): { name?: string; city?: string } | null {
-  return order.shipping_address as { name?: string; city?: string } | null;
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export function OrdersManager({ orders }: Props) {
+export function OrdersManager({ initialData, searchParams: query }: Props) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
-  const [deliveryFilter, setDeliveryFilter] = useState<DeliveryFilter>("all");
-  const [isSeeding, startSeed] = useTransition();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [searchVal, setSearchVal] = useState(query.search || "");
 
-  function handleSeedDemoOrders() {
-    startSeed(async () => {
+  const activeNeedsApproval = query.needs_approval === "true";
+  const activePayment = query.payment || "all";
+  const activeDelivery = query.delivery || "all";
+  const currentPage = initialData.page;
+
+  function updateQuery(params: Record<string, string | null>) {
+    const sp = new URLSearchParams(window.location.search);
+    for (const [k, v] of Object.entries(params)) {
+      if (v === null || v === "" || v === "all" || v === "false") {
+        sp.delete(k);
+      } else {
+        sp.set(k, v);
+      }
+    }
+    // Always reset to page 1 on filter changes unless changing page
+    if (!("page" in params)) {
+      sp.delete("page");
+    }
+
+    startTransition(() => {
+      router.push(`${pathname}?${sp.toString()}`);
+    });
+  }
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    updateQuery({ search: searchVal.trim() || null });
+  }
+
+  function handleQuickNeedsApproval() {
+    if (activeNeedsApproval) {
+      updateQuery({ needs_approval: null });
+    } else {
+      updateQuery({ needs_approval: "true", delivery: null, payment: null });
+    }
+  }
+
+  function handleReloadDemoOrders() {
+    startTransition(async () => {
       await seedDemoOrdersAction();
       router.refresh();
     });
   }
 
-  const filtered = useMemo(() => {
-    let result = orders;
-
-    // Payment filter
-    const pf = PAYMENT_FILTERS.find((f) => f.key === paymentFilter);
-    if (pf && pf.statuses.length > 0) {
-      result = result.filter((o) => pf.statuses.includes(o.status));
-    }
-
-    // Delivery filter
-    const df = DELIVERY_FILTERS.find((f) => f.key === deliveryFilter);
-    if (df && df.statuses.length > 0) {
-      result = result.filter((o) => df.statuses.includes(o.status));
-    }
-
-    // Search
-    if (search.trim()) {
-      const q = search.toLowerCase().trim();
-      result = result.filter((o) => {
-        const addr = getAddr(o);
-        const name = addr?.name?.toLowerCase() ?? "";
-        const city = addr?.city?.toLowerCase() ?? "";
-        const id = o.id.toLowerCase();
-        const email = o.email?.toLowerCase() ?? "";
-        const phone = o.phone ?? "";
-        const tracking = o.tracking_number?.toLowerCase() ?? "";
-        const razorpay = o.razorpay_order_id?.toLowerCase() ?? "";
-        return (
-          id.includes(q) ||
-          name.includes(q) ||
-          city.includes(q) ||
-          email.includes(q) ||
-          phone.includes(q) ||
-          tracking.includes(q) ||
-          razorpay.includes(q)
-        );
-      });
-    }
-
-    return result;
-  }, [orders, search, paymentFilter, deliveryFilter]);
+  const waitingCount = initialData.counts.waiting_approval;
 
   return (
     <div className="space-y-5">
-      {/* ── Search ── */}
-      <div className="relative">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/35 text-sm pointer-events-none">
-          🔍
-        </span>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by Order ID, customer name, phone, email, or tracking number…"
-          className="w-full pl-11 pr-10 py-3 rounded-[14px] font-body text-sm text-ink bg-paper border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 shadow-soft transition-all"
-        />
-        {search && (
-          <button
-            onClick={() => setSearch("")}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink/35 hover:text-ink text-xs p-1 cursor-pointer"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      {/* ── Filter Groups ── */}
-      <div className="bg-paper rounded-[18px] border border-brand shadow-soft p-4 space-y-3">
-        {/* Payment Status */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-label text-[9.5px] text-ink/40 uppercase tracking-widest font-semibold w-20 shrink-0">
-            Payment
+      {/* ── Top Bar: Search & Quick "NEEDS APPROVAL" Filter ── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Search input */}
+        <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-lg">
+          <input
+            type="text"
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            placeholder="Search Order #, UUID, customer name, phone, email, AWB…"
+            className="w-full pl-9 pr-20 py-2.5 rounded-[12px] bg-paper border border-brand font-body text-xs text-ink placeholder:text-ink/35 focus:outline-none focus:border-berry transition-colors shadow-2xs"
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40 text-xs">
+            🔍
           </span>
-          {PAYMENT_FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setPaymentFilter(f.key)}
-              className={`px-3 py-1.5 rounded-full font-label text-[10px] uppercase tracking-wider transition-all font-medium cursor-pointer border ${
-                paymentFilter === f.key
-                  ? "bg-blue-700 text-paper border-blue-700 shadow-xs"
-                  : "bg-surface/60 text-ink/60 border-brand hover:text-ink hover:border-ink/20"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-brand/60" />
-
-        {/* Delivery Stage */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-label text-[9.5px] text-ink/40 uppercase tracking-widest font-semibold w-20 shrink-0">
-            Delivery
-          </span>
-          {DELIVERY_FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setDeliveryFilter(f.key)}
-              className={`px-3 py-1.5 rounded-full font-label text-[10px] uppercase tracking-wider transition-all font-medium cursor-pointer border ${
-                deliveryFilter === f.key
-                  ? "bg-emerald-700 text-paper border-emerald-700 shadow-xs"
-                  : "bg-surface/60 text-ink/60 border-brand hover:text-ink hover:border-ink/20"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Reset */}
-        {(paymentFilter !== "all" || deliveryFilter !== "all" || search) && (
-          <div className="flex justify-end border-t border-brand/60 pt-2">
+          {searchVal && (
             <button
               type="button"
               onClick={() => {
-                setPaymentFilter("all");
-                setDeliveryFilter("all");
-                setSearch("");
+                setSearchVal("");
+                updateQuery({ search: null });
               }}
-              className="font-label text-[10px] text-berry hover:underline uppercase tracking-wider cursor-pointer"
+              className="absolute right-12 top-1/2 -translate-y-1/2 text-ink/35 hover:text-ink text-xs font-label"
             >
-              Reset All Filters
+              ✕
             </button>
-          </div>
-        )}
+          )}
+          <button
+            type="submit"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[8px] bg-surface font-label text-[10px] text-ink/70 hover:text-ink font-semibold uppercase tracking-wider"
+          >
+            Find
+          </button>
+        </form>
+
+        {/* Quick Needs Approval Action */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={handleQuickNeedsApproval}
+            className={`px-4 py-2.5 rounded-[12px] font-label text-[10.5px] uppercase tracking-wider font-semibold border transition-all cursor-pointer flex items-center gap-2 ${
+              activeNeedsApproval
+                ? "bg-berry text-paper border-berry shadow-sm"
+                : "bg-paper text-ink/75 border-brand hover:border-berry/60 hover:text-berry shadow-2xs"
+            }`}
+          >
+            <span>🚨 Needs Approval</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                activeNeedsApproval
+                  ? "bg-paper/25 text-paper"
+                  : waitingCount > 0
+                  ? "bg-amber-100 text-amber-900 border border-amber-300"
+                  : "bg-surface text-ink/40"
+              }`}
+            >
+              {waitingCount}
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* ── Count & Quick Seed ── */}
+      {/* ── Filter Rows (Payment & Delivery) ── */}
+      <div className="rounded-[16px] p-4 bg-paper border border-brand shadow-soft space-y-3.5">
+        {/* Payment filter */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-label text-[10px] text-ink/40 uppercase tracking-widest w-16 shrink-0">
+            Payment:
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {PAYMENT_FILTERS.map((f) => {
+              const count = f.key === "all" ? initialData.counts.all : (initialData.counts as any)[f.key] || 0;
+              const active = activePayment === f.key && !activeNeedsApproval;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => updateQuery({ payment: f.key, needs_approval: null })}
+                  className={`px-3 py-1 rounded-[9px] font-label text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer border ${
+                    active
+                      ? "bg-ink text-paper border-ink"
+                      : "bg-surface/60 text-ink/60 border-brand/60 hover:border-brand hover:text-ink"
+                  }`}
+                >
+                  {f.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Delivery filter */}
+        <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-brand/50">
+          <span className="font-label text-[10px] text-ink/40 uppercase tracking-widest w-16 shrink-0">
+            Delivery:
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {DELIVERY_FILTERS.map((f) => {
+              const count = f.key === "all" ? initialData.counts.all : (initialData.counts as any)[f.key] || 0;
+              const active = activeDelivery === f.key && !activeNeedsApproval;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => updateQuery({ delivery: f.key, needs_approval: null })}
+                  className={`px-3 py-1 rounded-[9px] font-label text-[10px] uppercase tracking-wider font-semibold transition-all cursor-pointer border ${
+                    active
+                      ? "bg-berry text-paper border-berry"
+                      : "bg-surface/60 text-ink/60 border-brand/60 hover:border-brand hover:text-ink"
+                  }`}
+                >
+                  {f.label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Active Count & Seeder ── */}
       <div className="flex items-center justify-between px-1">
         <p className="font-body text-xs text-ink/45">
-          Showing <strong className="text-ink font-semibold">{filtered.length}</strong> of{" "}
-          <strong className="text-ink font-semibold">{orders.length}</strong> orders
+          Showing <strong className="text-ink font-semibold">{initialData.orders.length}</strong> of{" "}
+          <strong className="text-ink font-semibold">{initialData.totalCount}</strong> matching order
+          {initialData.totalCount !== 1 ? "s" : ""}
+          {isPending && <span className="ml-2 text-berry animate-pulse">updating…</span>}
         </p>
 
         <button
           type="button"
-          onClick={handleSeedDemoOrders}
-          disabled={isSeeding}
+          onClick={handleReloadDemoOrders}
+          disabled={isPending}
           className="font-label text-[10px] text-berry hover:text-[#580118] uppercase tracking-wider font-semibold cursor-pointer disabled:opacity-40"
         >
-          {isSeeding ? "Loading Demo Orders…" : "✨ Reload Demo Orders"}
+          {isPending ? "Syncing…" : "✨ Reload Sample Orders"}
         </button>
       </div>
 
-      {/* ── Table ── */}
-      {filtered.length === 0 ? (
+      {/* ── Orders Table ── */}
+      {initialData.orders.length === 0 ? (
         <div className="rounded-[18px] p-12 text-center bg-paper border border-brand shadow-soft space-y-3">
-          <p className="font-body text-sm text-ink/40">No orders match the current filters.</p>
-          {search ? (
-            <p className="font-body text-xs text-ink/30 mt-1">
-              Try searching by a different term.
-            </p>
-          ) : (
+          <p className="font-body text-sm text-ink/45">No orders match the current criteria.</p>
+          <div className="flex justify-center gap-3">
             <button
               type="button"
-              onClick={handleSeedDemoOrders}
-              disabled={isSeeding}
-              className="mt-2 px-4 py-2 rounded-[10px] bg-berry text-paper font-label text-[10.5px] uppercase tracking-wider font-semibold shadow-xs hover:bg-[#580118] disabled:opacity-50 cursor-pointer"
+              onClick={() => updateQuery({ search: null, payment: null, delivery: null, needs_approval: null })}
+              className="px-4 py-2 rounded-[10px] bg-surface font-label text-[10px] uppercase tracking-wider font-semibold text-ink border border-brand hover:border-ink cursor-pointer"
             >
-              {isSeeding ? "Seeding Orders…" : "✨ Load Sample Staging Orders"}
+              Clear Filters
             </button>
-          )}
+            <button
+              type="button"
+              onClick={handleReloadDemoOrders}
+              className="px-4 py-2 rounded-[10px] bg-berry text-paper font-label text-[10px] uppercase tracking-wider font-semibold hover:bg-[#580118] cursor-pointer"
+            >
+              ✨ Seed Sample Orders
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="rounded-[18px] bg-paper border border-brand overflow-x-auto shadow-soft">
-          <table className="w-full min-w-[700px]">
-            <thead>
-              <tr className="bg-surface/70 border-b border-brand">
-                {["Order", "Customer", "Items", "Total", "Payment", "Delivery", "Date", "Action"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3.5 text-left font-label text-[9.5px] text-ink/45 uppercase tracking-wider whitespace-nowrap font-semibold"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-brand/50">
-              {filtered.map((order) => {
-                const addr = getAddr(order);
-                const items = Array.isArray(order.items) ? order.items : [];
-                const payBadge = PAYMENT_STATUS[order.status] ?? PAYMENT_STATUS.pending;
-                const delBadge = DELIVERY_STATUS[order.status] ?? DELIVERY_STATUS.pending;
+        <div className="rounded-[18px] bg-paper border border-brand overflow-hidden shadow-soft">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-brand bg-surface/70 font-label text-[9.5px] uppercase tracking-wider text-ink/45 font-semibold">
+                  <th className="py-3 px-4">Order</th>
+                  <th className="py-3 px-4">Customer</th>
+                  <th className="py-3 px-4">Items</th>
+                  <th className="py-3 px-4">Total</th>
+                  <th className="py-3 px-4">Payment</th>
+                  <th className="py-3 px-4">Delivery Stage &amp; Courier</th>
+                  <th className="py-3 px-4">Dates</th>
+                  <th className="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-brand/60 font-body">
+                {initialData.orders.map((order) => {
+                  const shortId = order.id.slice(0, 8).toUpperCase();
+                  const placedDate = new Date(order.created_at).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  });
+                  const placedTime = new Date(order.created_at).toLocaleTimeString("en-IN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
 
-                return (
-                  <tr
-                    key={order.id}
-                    className="hover:bg-surface/40 transition-colors group"
-                  >
-                    {/* Order ID */}
-                    <td className="px-4 py-4">
-                      <span className="font-mono text-[11px] text-berry font-semibold">
-                        #{order.id.slice(0, 8).toUpperCase()}
-                      </span>
-                      {order.tracking_number && (
-                        <p className="font-mono text-[9.5px] text-ink/35 mt-0.5 truncate max-w-[80px]">
-                          {order.tracking_number}
+                  const payBadge = PAYMENT_BADGES[order.payment_status] || PAYMENT_BADGES.paid;
+                  const delBadge = DELIVERY_BADGES[order.delivery_status] || DELIVERY_BADGES.waiting_approval;
+                  const deliveryLabel =
+                    order.delivery_status === "pending_dropoff" && order.handover_method === "pickup"
+                      ? delBadge.pickupLabel || delBadge.label
+                      : delBadge.label;
+
+                  return (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-surface/35 transition-colors group"
+                    >
+                      {/* Order info */}
+                      <td className="py-3.5 px-4 font-body">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="font-mono text-xs text-ink font-semibold hover:text-berry transition-colors group-hover:underline flex items-center gap-1.5"
+                        >
+                          #{shortId}
+                          {order.needs_attention && (
+                            <span
+                              title="Courier state requires attention"
+                              className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-ping"
+                            />
+                          )}
+                        </Link>
+                        <p className="font-label text-[9.5px] text-ink/35 mt-0.5">
+                          {placedDate} · {placedTime}
                         </p>
-                      )}
-                    </td>
+                      </td>
 
-                    {/* Customer */}
-                    <td className="px-4 py-4">
-                      <p className="font-body text-xs text-ink font-medium leading-snug">
-                        {addr?.name ?? "Guest"}
-                      </p>
-                      <p className="font-body text-[11px] text-ink/40 mt-0.5">
-                        {order.phone ?? order.email ?? "—"}
-                      </p>
-                      {addr?.city && (
-                        <p className="font-label text-[9.5px] text-ink/30 uppercase tracking-wider mt-0.5">
-                          {addr.city}
+                      {/* Customer */}
+                      <td className="py-3.5 px-4">
+                        <p className="font-medium text-ink truncate max-w-[170px]">
+                          {order.shipping_address?.name || "Guest Customer"}
                         </p>
-                      )}
-                    </td>
+                        <p className="font-label text-[10px] text-ink/45 mt-0.5">
+                          {order.shipping_address?.city || order.phone || order.email}
+                        </p>
+                      </td>
 
-                    {/* Items */}
-                    <td className="px-4 py-4 font-body text-xs text-ink/55">
-                      {items.length} item{items.length !== 1 ? "s" : ""}
-                    </td>
+                      {/* Items */}
+                      <td className="py-3.5 px-4">
+                        <p className="font-medium text-ink truncate max-w-[180px]">
+                          {order.items_summary}
+                        </p>
+                        <p className="font-label text-[9.5px] text-ink/35 mt-0.5">
+                          {order.items_count} unit{order.items_count !== 1 ? "s" : ""}
+                        </p>
+                      </td>
 
-                    {/* Total */}
-                    <td className="px-4 py-4 font-label text-xs text-ink font-semibold whitespace-nowrap">
-                      ₹{Number(order.total).toLocaleString("en-IN")}
-                    </td>
+                      {/* Total */}
+                      <td className="py-3.5 px-4 font-label text-xs font-semibold text-ink whitespace-nowrap">
+                        ₹{order.total.toLocaleString("en-IN")}
+                      </td>
 
-                    {/* Payment Status Badge */}
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full font-label text-[9px] uppercase tracking-wider font-semibold border ${payBadge.classes}`}
-                      >
-                        {payBadge.label}
-                      </span>
-                    </td>
+                      {/* Payment */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-full font-label text-[9.5px] uppercase tracking-wider font-semibold border ${payBadge.classes}`}
+                        >
+                          {payBadge.label}
+                        </span>
+                        <p className="font-label text-[8.5px] text-ink/35 mt-0.5 uppercase tracking-widest">
+                          {order.payment_method === "cod" ? "COD" : "Razorpay"}
+                        </p>
+                      </td>
 
-                    {/* Delivery Stage Badge */}
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full font-label text-[9px] uppercase tracking-wider font-semibold border ${delBadge.classes}`}
-                      >
-                        {delBadge.label}
-                      </span>
-                    </td>
+                      {/* Delivery */}
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-full font-label text-[9.5px] uppercase tracking-wider font-semibold border ${delBadge.classes}`}
+                        >
+                          {deliveryLabel}
+                        </span>
 
-                    {/* Date */}
-                    <td className="px-4 py-4 font-body text-[11px] text-ink/45 whitespace-nowrap">
-                      {new Date(order.created_at).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
+                        {/* Courier & AWB */}
+                        {order.tracking_number ? (
+                          <div className="mt-1 flex items-center gap-1.5 font-label text-[9.5px]">
+                            <span className="text-ink/50 font-medium">
+                              {order.courier_name || "Courier"}:
+                            </span>
+                            <a
+                              href={`https://shiprocket.co/tracking/${order.tracking_number}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-mono text-berry font-semibold hover:underline"
+                            >
+                              {order.tracking_number} ↗
+                            </a>
+                          </div>
+                        ) : order.fulfillment_mode === "local" ? (
+                          <p className="font-label text-[9px] text-ink/40 mt-1 uppercase tracking-wider font-medium">
+                            🚗 Local Hand Delivery
+                          </p>
+                        ) : null}
+                      </td>
 
-                    {/* Action */}
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <Link
-                        href={`/admin/orders/${order.id}`}
-                        className="font-label text-[10.5px] text-berry hover:text-[#580118] font-medium transition-colors group-hover:underline"
-                      >
-                        Manage →
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {/* Dates cell */}
+                      <td className="py-3.5 px-4 whitespace-nowrap font-label text-[9px] text-ink/50 space-y-0.5">
+                        <div>
+                          <span className="text-ink/30 uppercase tracking-widest mr-1">Placed:</span>
+                          <span className="font-medium text-ink/70">{placedDate}</span>
+                        </div>
+                        <div>
+                          <span className="text-ink/30 uppercase tracking-widest mr-1">Expected:</span>
+                          <span className="font-medium text-ink/70">
+                            {order.expected_delivery_date || "—"}
+                          </span>
+                        </div>
+                        {order.delivered_at && (
+                          <div>
+                            <span className="text-emerald-700/60 uppercase tracking-widest mr-1">Delivered:</span>
+                            <span className="font-medium text-emerald-800">
+                              {new Date(order.delivered_at).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Manage */}
+                      <td className="py-3.5 px-4 text-right">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="inline-block px-3 py-1.5 rounded-[9px] bg-surface hover:bg-berry hover:text-paper font-label text-[10px] text-ink uppercase tracking-wider font-semibold transition-all border border-brand hover:border-berry shadow-2xs"
+                        >
+                          Manage →
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── Server-side Pagination ── */}
+          {initialData.totalPages > 1 && (
+            <div className="flex items-center justify-between p-4 border-t border-brand bg-surface/30">
+              <p className="font-label text-[10px] text-ink/50 uppercase tracking-wider">
+                Page {currentPage} of {initialData.totalPages}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={currentPage <= 1 || isPending}
+                  onClick={() => updateQuery({ page: String(currentPage - 1) })}
+                  className="px-3 py-1.5 rounded-[8px] bg-paper border border-brand font-label text-[10px] uppercase tracking-wider font-semibold text-ink disabled:opacity-30 disabled:cursor-not-allowed hover:border-ink cursor-pointer"
+                >
+                  ← Prev
+                </button>
+                <button
+                  type="button"
+                  disabled={currentPage >= initialData.totalPages || isPending}
+                  onClick={() => updateQuery({ page: String(currentPage + 1) })}
+                  className="px-3 py-1.5 rounded-[8px] bg-paper border border-brand font-label text-[10px] uppercase tracking-wider font-semibold text-ink disabled:opacity-30 disabled:cursor-not-allowed hover:border-ink cursor-pointer"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

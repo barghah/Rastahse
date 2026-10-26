@@ -1,11 +1,28 @@
-import { getAdminOrders } from "@/actions/admin";
+import { getAdminOrdersList } from "@/actions/orders-admin";
 import { OrdersManager } from "@/components/admin/OrdersManager";
 
-export default async function AdminOrdersPage() {
-  const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-  // Fetch ALL orders — client-side OrdersManager handles filtering
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orders = hasSupabase ? ((await getAdminOrders()) as any[]) : [];
+export const dynamic = "force-dynamic";
+
+interface PageProps {
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+    payment?: string;
+    delivery?: string;
+    needs_approval?: string;
+  }>;
+}
+
+export default async function AdminOrdersPage({ searchParams }: PageProps) {
+  const query = await searchParams;
+
+  const result = await getAdminOrdersList({
+    page: query.page ? parseInt(query.page, 10) : 1,
+    search: query.search,
+    paymentFilter: query.payment,
+    deliveryFilter: query.delivery,
+    quickApprovalOnly: query.needs_approval === "true",
+  });
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl">
@@ -15,15 +32,12 @@ export default async function AdminOrdersPage() {
             Orders Management
           </h1>
           <p className="font-body text-xs text-ink/50 mt-1">
-            {orders.length} total order{orders.length !== 1 ? "s" : ""} · Search, filter by payment or delivery stage
+            {result.totalCount} active order{result.totalCount !== 1 ? "s" : ""} · Search, filter by payment or delivery stage, and book via Shiprocket
           </p>
         </div>
       </div>
 
-      <OrdersManager orders={orders} />
+      <OrdersManager initialData={result} searchParams={query} />
     </div>
   );
 }
-
-
-

@@ -24,6 +24,15 @@ export interface Database {
           email: string;
           phone: string | null;
           status: "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
+          payment_method: "razorpay" | "cod";
+          payment_status: "awaiting_payment" | "paid" | "cod" | "refunded";
+          delivery_status: "waiting_approval" | "pending_dropoff" | "in_transit" | "delivered" | "retrying" | "returned" | "return_in_transit" | "cancelled";
+          fulfillment_mode: "shiprocket" | "local" | null;
+          needs_attention: boolean;
+          delivered_at: string | null;
+          expected_delivery_date: string | null;
+          cancelled_at: string | null;
+          cancel_reason: string | null;
           items: Json;
           subtotal: number;
           shipping_fee: number;
@@ -42,6 +51,15 @@ export interface Database {
           email: string;
           phone?: string | null;
           status?: "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
+          payment_method?: "razorpay" | "cod";
+          payment_status?: "awaiting_payment" | "paid" | "cod" | "refunded";
+          delivery_status?: "waiting_approval" | "pending_dropoff" | "in_transit" | "delivered" | "retrying" | "returned" | "return_in_transit" | "cancelled";
+          fulfillment_mode?: "shiprocket" | "local" | null;
+          needs_attention?: boolean;
+          delivered_at?: string | null;
+          expected_delivery_date?: string | null;
+          cancelled_at?: string | null;
+          cancel_reason?: string | null;
           items: Json;
           subtotal: number;
           shipping_fee: number;
@@ -60,6 +78,15 @@ export interface Database {
           email?: string;
           phone?: string | null;
           status?: "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
+          payment_method?: "razorpay" | "cod";
+          payment_status?: "awaiting_payment" | "paid" | "cod" | "refunded";
+          delivery_status?: "waiting_approval" | "pending_dropoff" | "in_transit" | "delivered" | "retrying" | "returned" | "return_in_transit" | "cancelled";
+          fulfillment_mode?: "shiprocket" | "local" | null;
+          needs_attention?: boolean;
+          delivered_at?: string | null;
+          expected_delivery_date?: string | null;
+          cancelled_at?: string | null;
+          cancel_reason?: string | null;
           items?: Json;
           subtotal?: number;
           shipping_fee?: number;
@@ -461,6 +488,294 @@ export interface Database {
         };
         Relationships: [];
       };
+
+      order_items: {
+        Row: {
+          id: string;
+          order_id: string;
+          variant_id: string | null;
+          sku: string;
+          name: string;
+          unit_price: number;
+          qty: number;
+          image: string | null;
+          weight_grams: number | null;
+          length_cm: number | null;
+          breadth_cm: number | null;
+          height_cm: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          variant_id?: string | null;
+          sku?: string;
+          name: string;
+          unit_price: number;
+          qty: number;
+          image?: string | null;
+          weight_grams?: number | null;
+          length_cm?: number | null;
+          breadth_cm?: number | null;
+          height_cm?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          order_id?: string;
+          variant_id?: string | null;
+          sku?: string;
+          name?: string;
+          unit_price?: number;
+          qty?: number;
+          image?: string | null;
+          weight_grams?: number | null;
+          length_cm?: number | null;
+          breadth_cm?: number | null;
+          height_cm?: number | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      shipments: {
+        Row: {
+          id: string;
+          order_id: string;
+          kind: "forward" | "return";
+          sr_order_id: string | null;
+          sr_shipment_id: string | null;
+          awb: string | null;
+          courier_id: string | null;
+          courier_name: string | null;
+          freight_charge: number | null;
+          pickup_location_name: string | null;
+          pickup_pincode: string | null;
+          handover_method: "pickup" | "dropoff";
+          pickup_scheduled_for: string | null;
+          label_url: string | null;
+          manifest_url: string | null;
+          tracking_url: string | null;
+          etd: string | null;
+          booking_step: "serviceability_checked" | "sr_order_created" | "awb_assigned" | "pickup_requested" | "label_ready" | "done";
+          status: "waiting_approval" | "pending_dropoff" | "in_transit" | "delivered" | "retrying" | "returned" | "return_in_transit" | "cancelled";
+          last_sr_status: string | null;
+          last_sr_payload: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          kind?: "forward" | "return";
+          sr_order_id?: string | null;
+          sr_shipment_id?: string | null;
+          awb?: string | null;
+          courier_id?: string | null;
+          courier_name?: string | null;
+          freight_charge?: number | null;
+          pickup_location_name?: string | null;
+          pickup_pincode?: string | null;
+          handover_method?: "pickup" | "dropoff";
+          pickup_scheduled_for?: string | null;
+          label_url?: string | null;
+          manifest_url?: string | null;
+          tracking_url?: string | null;
+          etd?: string | null;
+          booking_step?: "serviceability_checked" | "sr_order_created" | "awb_assigned" | "pickup_requested" | "label_ready" | "done";
+          status?: "waiting_approval" | "pending_dropoff" | "in_transit" | "delivered" | "retrying" | "returned" | "return_in_transit" | "cancelled";
+          last_sr_status?: string | null;
+          last_sr_payload?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          order_id?: string;
+          kind?: "forward" | "return";
+          sr_order_id?: string | null;
+          sr_shipment_id?: string | null;
+          awb?: string | null;
+          courier_id?: string | null;
+          courier_name?: string | null;
+          freight_charge?: number | null;
+          pickup_location_name?: string | null;
+          pickup_pincode?: string | null;
+          handover_method?: "pickup" | "dropoff";
+          pickup_scheduled_for?: string | null;
+          label_url?: string | null;
+          manifest_url?: string | null;
+          tracking_url?: string | null;
+          etd?: string | null;
+          booking_step?: "serviceability_checked" | "sr_order_created" | "awb_assigned" | "pickup_requested" | "label_ready" | "done";
+          status?: "waiting_approval" | "pending_dropoff" | "in_transit" | "delivered" | "retrying" | "returned" | "return_in_transit" | "cancelled";
+          last_sr_status?: string | null;
+          last_sr_payload?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shipments_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      shipment_events: {
+        Row: {
+          id: string;
+          shipment_id: string;
+          sr_status: string;
+          mapped_status: string;
+          location: string | null;
+          occurred_at: string;
+          payload: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          shipment_id: string;
+          sr_status: string;
+          mapped_status: string;
+          location?: string | null;
+          occurred_at?: string;
+          payload?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          shipment_id?: string;
+          sr_status?: string;
+          mapped_status?: string;
+          location?: string | null;
+          occurred_at?: string;
+          payload?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shipment_events_shipment_id_fkey";
+            columns: ["shipment_id"];
+            isOneToOne: false;
+            referencedRelation: "shipments";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      ndr_cases: {
+        Row: {
+          id: string;
+          shipment_id: string;
+          attempt_no: number;
+          reason: string | null;
+          resolved: boolean;
+          action_taken: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          shipment_id: string;
+          attempt_no?: number;
+          reason?: string | null;
+          resolved?: boolean;
+          action_taken?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          shipment_id?: string;
+          attempt_no?: number;
+          reason?: string | null;
+          resolved?: boolean;
+          action_taken?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+
+      shop_settings: {
+        Row: {
+          id: number;
+          cod_enabled: boolean;
+          cod_max_amount: number;
+          cod_blocked_pincodes: string[];
+          default_pickup_location_name: string;
+          ndr_max_attempts: number;
+          return_window_days: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          cod_enabled?: boolean;
+          cod_max_amount?: number;
+          cod_blocked_pincodes?: string[];
+          default_pickup_location_name?: string;
+          ndr_max_attempts?: number;
+          return_window_days?: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          cod_enabled?: boolean;
+          cod_max_amount?: number;
+          cod_blocked_pincodes?: string[];
+          default_pickup_location_name?: string;
+          ndr_max_attempts?: number;
+          return_window_days?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
+      pickup_locations: {
+        Row: {
+          id: string;
+          name: string;
+          pin: string;
+          address: string;
+          city: string;
+          state: string;
+          phone: string;
+          is_default: boolean;
+          synced_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          pin: string;
+          address: string;
+          city: string;
+          state: string;
+          phone: string;
+          is_default?: boolean;
+          synced_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          pin?: string;
+          address?: string;
+          city?: string;
+          state?: string;
+          phone?: string;
+          is_default?: boolean;
+          synced_at?: string;
+        };
+        Relationships: [];
+      };
     };
 
     Views: Record<string, never>;
@@ -522,3 +837,9 @@ export type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 export type ProductVariantRow = Database["public"]["Tables"]["product_variants"]["Row"];
 export type ProductImageRow = Database["public"]["Tables"]["product_images"]["Row"];
 export type StockMovementRow = Database["public"]["Tables"]["stock_movements"]["Row"];
+export type OrderItemRow = Database["public"]["Tables"]["order_items"]["Row"];
+export type ShipmentRow = Database["public"]["Tables"]["shipments"]["Row"];
+export type ShipmentEventRow = Database["public"]["Tables"]["shipment_events"]["Row"];
+export type NdrCaseRow = Database["public"]["Tables"]["ndr_cases"]["Row"];
+export type ShopSettingsRow = Database["public"]["Tables"]["shop_settings"]["Row"];
+export type PickupLocationRow = Database["public"]["Tables"]["pickup_locations"]["Row"];
