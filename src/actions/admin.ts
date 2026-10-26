@@ -3,7 +3,20 @@
 import { cache } from "react";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+
+export async function purgeCatalogCache() {
+  try {
+    revalidateTag("products", "default");
+    revalidateTag("categories", "default");
+  } catch {
+    // Ignore outside request scope
+  }
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/inventory");
+  revalidatePath("/shop");
+  revalidatePath("/");
+}
 import type { Database } from "@/types/supabase";
 import { recordOrderCompletion, recordInventoryPurchase } from "@/lib/accounting";
 
@@ -267,7 +280,7 @@ export async function upsertProductOverride(
   try {
     const admin = await createAdminClient();
 
-    // 1. Attempt full upsert
+    // 1. Attempt full upsert into overrides
     const { error } = await admin.from("product_overrides").upsert(
       {
         product_id: productId,
@@ -276,6 +289,25 @@ export async function upsertProductOverride(
       },
       { onConflict: "product_id" }
     );
+
+    // 2. Synchronize directly into products table
+    const prodUpdates: any = {};
+    if (overrides.price_override !== undefined && overrides.price_override !== null) {
+      prodUpdates.base_price = Math.round(overrides.price_override * 100);
+    }
+    if (overrides.description_override !== undefined && overrides.description_override !== null) {
+      prodUpdates.description = overrides.description_override;
+      prodUpdates.story = overrides.description_override;
+    }
+    if (overrides.is_hidden !== undefined) {
+      prodUpdates.is_hidden = overrides.is_hidden;
+    }
+    if (overrides.is_deleted !== undefined) {
+      prodUpdates.is_deleted = overrides.is_deleted;
+    }
+    if (Object.keys(prodUpdates).length > 0) {
+      await admin.from("products").update(prodUpdates).eq("id", productId);
+    }
 
     if (error) {
       // If error is caused by missing is_hidden or is_deleted columns in user's Supabase DB
@@ -313,8 +345,7 @@ export async function upsertProductOverride(
       return { success: false, error: error.message };
     }
 
-    revalidatePath("/admin/products");
-    revalidatePath("/", "layout");
+    purgeCatalogCache();
     return { success: true };
   } catch (err) {
     return {
@@ -329,12 +360,9 @@ export async function toggleProductVisibility(productId: string, isHidden: boole
   try {
     const { error } = await admin.from("products").update({ is_hidden: isHidden }).eq("id", productId);
     if (error) {
-      // Fallback to overrides table if products table update fails
       return upsertProductOverride(productId, { is_hidden: isHidden });
     }
-    revalidatePath("/admin/products");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true };
   } catch {
     return upsertProductOverride(productId, { is_hidden: isHidden });
@@ -348,9 +376,7 @@ export async function deleteProduct(productId: string) {
     if (error) {
       return upsertProductOverride(productId, { is_deleted: true, is_hidden: true });
     }
-    revalidatePath("/admin/products");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true };
   } catch {
     return upsertProductOverride(productId, { is_deleted: true, is_hidden: true });
@@ -364,9 +390,7 @@ export async function restoreProduct(productId: string) {
     if (error) {
       return upsertProductOverride(productId, { is_deleted: false, is_hidden: false });
     }
-    revalidatePath("/admin/products");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true };
   } catch {
     return upsertProductOverride(productId, { is_deleted: false, is_hidden: false });
@@ -764,10 +788,7 @@ export async function createProduct(
       }
     }
 
-    revalidatePath("/admin/products");
-    revalidatePath("/admin/accounting");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true, id: newId };
   } catch (err) {
     return {
@@ -860,9 +881,7 @@ export async function adjustProductStock(input: {
       }
     }
 
-    revalidatePath("/admin/products");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true };
   } catch (err) {
     return {
@@ -882,16 +901,13 @@ export async function updateProductName(
     if (!clean) return { success: false, error: "Product name cannot be empty." };
 
     const admin = await createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (admin.from("db_products") as any)
-      .update({ title: clean })
+    const { error } = await admin
+      .from("products")
+      .update({ name: clean })
       .eq("id", productId);
     if (error) return { success: false, error: error.message };
 
-    revalidatePath("/admin/products");
-    revalidatePath("/admin/accounting");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true };
   } catch (err) {
     return {
@@ -909,21 +925,24 @@ export async function updateProductImages(
   await requireAdmin();
   try {
     const admin = await createAdminClient();
-    const payload = images.map((img, i) => ({
-      url: img.url,
-      alt: img.alt || `${productTitle} – image ${i + 1}`,
-    }));
+    
+    // 1. Delete existing images from product_images table
+    await admin.from("product_images").delete().eq("product_id", productId);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (admin.from("db_products") as any)
-      .update({ images: payload })
-      .eq("id", productId);
+    // 2. Insert updated images with ordering and primary flag
+    if (images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        await admin.from("product_images").insert({
+          product_id: productId,
+          url: images[i].url,
+          alt_text: images[i].alt || `${productTitle} – ${i + 1}`,
+          sort_order: i,
+          is_primary: i === 0,
+        });
+      }
+    }
 
-    if (error) return { success: false, error: error.message };
-
-    revalidatePath("/admin/products");
-    revalidatePath("/shop");
-    revalidatePath("/");
+    purgeCatalogCache();
     return { success: true };
   } catch (err) {
     return {

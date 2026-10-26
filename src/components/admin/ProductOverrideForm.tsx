@@ -246,6 +246,18 @@ export function ProductOverrideForm({ product, override }: Props) {
     }
 
     startTransition(async () => {
+      // 1. Save name if edited
+      if (nameStr.trim() && nameStr.trim() !== product.name) {
+        await updateProductName(product.id, nameStr);
+      }
+
+      // 2. Save images if modified
+      if (imgDirty) {
+        await updateProductImages(product.id, imgs, nameStr || product.name);
+        setImgDirty(false);
+      }
+
+      // 3. Save price, description, visibility, stock
       const res = await upsertProductOverride(product.id, {
         price_override: price,
         description_override: description || undefined,
@@ -255,12 +267,12 @@ export function ProductOverrideForm({ product, override }: Props) {
       });
 
       if (!res.success) {
-        setErrorMsg(res.error || "Failed to save overrides.");
+        setErrorMsg(res.error || "Failed to save changes.");
       } else {
         if (res.error) {
           setErrorMsg(res.error);
         } else {
-          setSuccessMsg("Saved changes successfully");
+          setSuccessMsg("Saved changes successfully! Storefront updated.");
         }
         router.refresh();
       }
