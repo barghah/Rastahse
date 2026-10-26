@@ -129,7 +129,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
               {/* Category */}
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <Link
                   href={`/category/${product.categorySlug}`}
                   className="font-label text-[10px] text-berry uppercase tracking-widest hover:underline"
@@ -139,7 +139,13 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 {product.origin && (
                   <>
                     <span className="text-ink/30 text-xs">·</span>
-                    <span className="font-label text-[10px] text-ink/60">{product.origin}</span>
+                    <span className="font-label text-[10px] text-ink/60 uppercase tracking-wider">{product.origin}</span>
+                  </>
+                )}
+                {product.artisanName && (
+                  <>
+                    <span className="text-ink/30 text-xs">·</span>
+                    <span className="font-label text-[10px] text-ink/75 font-medium">By {product.artisanName}</span>
                   </>
                 )}
               </div>
@@ -373,9 +379,14 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 )}
 
                 {activeTab === "craft" && (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
+                    {product.artisanName && (
+                      <p>
+                        <strong>Artisan / Studio:</strong> {product.artisanName}
+                      </p>
+                    )}
                     <p>
-                      <strong>Origin:</strong> {product.origin || "India"}
+                      <strong>Origin &amp; Heritage:</strong> {product.origin || "India"}
                     </p>
                     <p>
                       <strong>Authenticity:</strong> Each item is crafted individually by generational artisans. Variations in weave, glaze, grain, and color are authentic signatures of the handmade process.
@@ -387,7 +398,20 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 )}
 
                 {activeTab === "shipping" && (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
+                    {Boolean(product.weightGrams || product.lengthCm) && (
+                      <p>
+                        <strong>Package Specifications:</strong>{" "}
+                        {[
+                          product.weightGrams ? `${product.weightGrams}g` : null,
+                          product.lengthCm && product.breadthCm && product.heightCm
+                            ? `${product.lengthCm} × ${product.breadthCm} × ${product.heightCm} cm`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
                     <p>
                       <strong>Complimentary Packing:</strong> Wrapped in unbleached kraft paper and tied with natural jute string.
                     </p>

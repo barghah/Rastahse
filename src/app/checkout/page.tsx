@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +8,12 @@ import { useCartStore } from "@/stores/cart-store";
 import { formatPrice } from "@/types/product";
 import { BrandLoader } from "@/components/ui/BrandLoader";
 import { DispatchNotice } from "@/components/checkout/DispatchNotice";
+import {
+  getCustomerSession,
+  getCustomerAddressesAction,
+  type CustomerAddress,
+} from "@/actions/customer-auth";
+import { createOrder } from "@/actions/orders";
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart, closeCart } = useCartStore();
@@ -31,28 +37,97 @@ export default function CheckoutPage() {
     notes: "Please leave package with building security if unattended.",
   });
 
+  const [savedAddresses, setSavedAddresses] = useState<CustomerAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+
+  const selectAddress = useCallback((addr: CustomerAddress) => {
+    setSelectedAddressId(addr.id);
+    const parts = addr.full_name.trim().split(" ");
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ") || "";
+
+    setFormData((prev) => ({
+      ...prev,
+      firstName,
+      lastName,
+      phone: addr.phone,
+      address: addr.line1,
+      locality: addr.line2 || "",
+      city: addr.city,
+      state: addr.state,
+      pincode: addr.pincode,
+    }));
+  }, []);
+
+  useEffect(() => {
+    async function loadCustomer() {
+      try {
+        const session = await getCustomerSession();
+        if (session) {
+          setUserId(session.id);
+          if (session.email) {
+            setFormData((prev) => ({ ...prev, email: session.email || prev.email }));
+          }
+          const addrs = await getCustomerAddressesAction();
+          setSavedAddresses(addrs);
+          const defaultAddr = addrs.find((a) => a.is_default) || addrs[0];
+          if (defaultAddr) {
+            selectAddress(defaultAddr);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load customer profile:", err);
+      }
+    }
+    loadCustomer();
+  }, [selectAddress]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
 
   const total = totalPrice();
-  const shipping = total > 200000 ? 0 : 15000; // Free above â‚¹2,000
+  const shipping = total > 200000 ? 0 : 15000; // Free above ₹2,000
   const grandTotal = total + shipping;
 
-  const handleSubmitOrder = (e: React.FormEvent) => {
+  const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
 
     setIsSubmitting(true);
+    try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      const res = await createOrder({
+        email: formData.email,
+        phone: formData.phone,
+        items,
+        subtotal: total,
+        shippingFee: shipping,
+        total: grandTotal,
+        userId,
+        shippingAddress: {
+          fullName,
+          line1: formData.address,
+          line2: formData.locality,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          country: "IN",
+          phone: formData.phone,
+        },
+      });
 
-    // Smooth, quiet transition to order placed state
-    setTimeout(() => {
-      const generatedId = `RST-${Math.floor(100000 + Math.random() * 900000)}`;
-      setOrderId(generatedId);
+      setOrderId(res.orderId);
       setIsSubmitting(false);
       setOrderPlaced(true);
       clearCart();
-    }, 800);
+    } catch (err: unknown) {
+      console.error("[handleSubmitOrder] Error:", err);
+      const msg = err instanceof Error ? err.message : "Failed to place order";
+      alert(msg);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -139,20 +214,20 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/shop" className="flex-1">
+                <Link href="/account" className="flex-1">
                   <motion.button
                     whileTap={{ scale: 0.985 }}
                     className="w-full py-3 rounded-[12px] bg-berry text-paper font-label text-[10px] uppercase tracking-widest hover:bg-[#580118] transition-colors shadow-soft"
                   >
-                    Continue Browsing
+                    Track in Account
                   </motion.button>
                 </Link>
-                <Link href="/" className="flex-1">
+                <Link href="/shop" className="flex-1">
                   <motion.button
                     whileTap={{ scale: 0.985 }}
                     className="w-full py-3 rounded-[12px] bg-paper text-ink font-label text-[10px] uppercase tracking-widest hover:bg-surface transition-colors border border-brand"
                   >
-                    Return Home
+                    Continue Browsing
                   </motion.button>
                 </Link>
               </div>
@@ -231,9 +306,47 @@ export default function CheckoutPage() {
 
               {/* Shipping Address */}
               <div className="bg-paper p-6 rounded-[20px] border border-brand shadow-soft space-y-4">
-                <h2 className="font-label text-xs uppercase tracking-wider text-ink font-semibold">
-                  2. Shipping Address
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
+                  <h2 className="font-label text-xs uppercase tracking-wider text-ink font-semibold">
+                    2. Shipping Address
+                  </h2>
+                  {savedAddresses.length > 0 && (
+                    <span className="font-label text-[9px] text-berry uppercase tracking-wider font-medium">
+                      ✓ {savedAddresses.length} Stored Addresses Available
+                    </span>
+                  )}
+                </div>
+
+                {/* Stored addresses selector chips */}
+                {savedAddresses.length > 0 && (
+                  <div className="p-3 rounded-[12px] bg-surface/70 border border-brand/60 space-y-2">
+                    <p className="font-label text-[9.5px] uppercase tracking-wider text-ink/50">
+                      Choose Saved Address (1-Click Fill)
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {savedAddresses.map((addr) => {
+                        const isSelected = selectedAddressId === addr.id;
+                        return (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => selectAddress(addr)}
+                            className={`px-3 py-1.5 rounded-[10px] font-label text-[10px] uppercase tracking-wider border transition-all cursor-pointer flex items-center gap-1.5 ${
+                              isSelected
+                                ? "bg-berry text-paper border-berry shadow-soft"
+                                : "bg-paper text-ink/70 border-brand hover:border-ink/40"
+                            }`}
+                          >
+                            <span>📍</span>
+                            <span>{addr.label}</span>
+                            {addr.is_default && <span className="opacity-80 text-[8.5px]">(Default)</span>}
+                            <span className="text-[9px] opacity-70">&middot; {addr.city}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="font-label text-[10px] text-ink/60 uppercase block mb-1">First Name</label>

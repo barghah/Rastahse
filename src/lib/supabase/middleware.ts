@@ -46,12 +46,7 @@ export async function updateSession(request: NextRequest) {
   // Refresh session (keep tokens alive)
   const { data: { user } } = await supabase.auth.getUser();
 
-  // ── Protect /account — must be logged in ──────────────────────────────────
-  if (pathname === "/account" && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/auth/login";
-    return NextResponse.redirect(loginUrl);
-  }
+  // /account renders inline customer login / signup if not authenticated.
 
   // ── Protect /admin/* — must be logged in ─────────────────────────────────
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {

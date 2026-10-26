@@ -11,8 +11,9 @@ import {
   markLocalDeliveredAction,
   markCodRemittedAction,
   getCourierServiceability,
+  updateOrderDeliveryStatusAction,
 } from "@/actions/orders-admin";
-import type { ShiprocketCourierPartner } from "@/lib/shiprocket/types";
+import type { ShiprocketCourierPartner, DeliveryStatus } from "@/lib/shiprocket/types";
 import type { PickupLocationRow } from "@/types/supabase";
 
 interface Props {
@@ -95,6 +96,15 @@ export function OrderDetailManage({ data }: Props) {
   // Local delivery modal/drawer
   const [showLocalDialog, setShowLocalDialog] = useState(false);
   const [localNote, setLocalNote] = useState("");
+  const [localInitialStatus, setLocalInitialStatus] = useState<"pending_dropoff" | "in_transit">("pending_dropoff");
+
+  // Delivery status management & inspection dialogs
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
+  const [returnActionType, setReturnActionType] = useState<"restock" | "damaged_write_off">("restock");
+  const [returnNote, setReturnNote] = useState("");
+
+  const [showNdrDialog, setShowNdrDialog] = useState(false);
+  const [ndrReasonText, setNdrReasonText] = useState("Customer unavailable / Door locked");
 
   // Fetch Courier Quotes when parameters change
   useEffect(() => {
@@ -198,7 +208,7 @@ export function OrderDetailManage({ data }: Props) {
   function handleApproveLocal() {
     setActionError(null);
     startTransition(async () => {
-      const res = await approveLocalDeliveryOrder(order.id, localNote);
+      const res = await approveLocalDeliveryOrder(order.id, localNote, localInitialStatus);
       if (!res.success) {
         setActionError(res.error || "Failed to approve local order.");
       } else {
@@ -227,6 +237,32 @@ export function OrderDetailManage({ data }: Props) {
       if (!res.success) {
         setActionError(res.error || "Failed to mark remitted.");
       } else {
+        router.refresh();
+      }
+    });
+  }
+
+  function handleDeliveryStatusChange(
+    targetStatus: DeliveryStatus,
+    extra?: { returnAction?: "restock" | "damaged_write_off"; ndrReason?: string; notes?: string }
+  ) {
+    setActionError(null);
+    setActionSuccess(null);
+    startTransition(async () => {
+      const res = await updateOrderDeliveryStatusAction({
+        orderId: order.id,
+        targetStatus,
+        returnAction: extra?.returnAction,
+        ndrReason: extra?.ndrReason,
+        notes: extra?.notes,
+      });
+
+      if (!res.success) {
+        setActionError(res.error || "Failed to update delivery status.");
+      } else {
+        setActionSuccess(`Status updated to ${targetStatus.replace(/_/g, " ").toUpperCase()}`);
+        setShowReturnDialog(false);
+        setShowNdrDialog(false);
         router.refresh();
       }
     });
@@ -404,6 +440,198 @@ export function OrderDetailManage({ data }: Props) {
           </div>
         </div>
       </div>
+
+      {/* ── DELIVERY LIFECYCLE & MANUAL OVERRIDE CONTROLS ── */}
+      <div className="rounded-[18px] p-6 bg-paper border border-brand shadow-soft space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-brand">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-base">📦</span>
+              <p className="font-label text-xs uppercase tracking-wider font-bold text-ink">
+                Delivery Lifecycle &amp; Status Controls
+              </p>
+            </div>
+            <p className="font-body text-xs text-ink/50 mt-0.5">
+              Manage local dispatch or override courier status. Stock adjusts automatically (decrements on delivery, restocks on inspected return, or writes off if damaged).
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="font-label text-[9px] uppercase tracking-wider text-ink/40">Fulfillment:</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-surface border border-brand font-label text-[9.5px] uppercase tracking-wider font-semibold text-ink">
+              {order.fulfillment_mode === "local" ? "🚗 Local Hand Delivery" : "🚀 Shiprocket Courier"}
+            </span>
+          </div>
+        </div>
+
+        {/* Action Buttons for State Transitions */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+          {/* 1. Pending Dispatch */}
+          <button
+            type="button"
+            disabled={isPending || order.delivery_status === "pending_dropoff"}
+            onClick={() => handleDeliveryStatusChange("pending_dropoff", { notes: "Order packed / Ready for dispatch" })}
+            className={`p-3 rounded-[12px] border text-left transition-all cursor-pointer ${
+              order.delivery_status === "pending_dropoff"
+                ? "bg-stone-100 border-stone-400 text-stone-900 font-semibold cursor-default"
+                : "bg-surface/50 border-brand hover:border-ink/20 hover:bg-surface text-ink"
+            } disabled:opacity-40`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-base">📦</span>
+              {order.delivery_status === "pending_dropoff" && (
+                <span className="font-label text-[8.5px] bg-stone-700 text-paper px-1.5 py-0.5 rounded-full uppercase font-bold">
+                  Active
+                </span>
+              )}
+            </div>
+            <p className="font-label text-[10.5px] uppercase tracking-wider font-bold">Pending</p>
+            <p className="font-body text-[10px] text-ink/50 mt-0.5">Packed / Ready</p>
+          </button>
+
+          {/* 2. In Transit */}
+          <button
+            type="button"
+            disabled={isPending || order.delivery_status === "in_transit"}
+            onClick={() => handleDeliveryStatusChange("in_transit")}
+            className={`p-3 rounded-[12px] border text-left transition-all cursor-pointer ${
+              order.delivery_status === "in_transit"
+                ? "bg-berry/10 border-berry text-berry font-semibold cursor-default"
+                : "bg-surface/50 border-brand hover:border-ink/20 hover:bg-surface text-ink"
+            } disabled:opacity-40`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-base">🚚</span>
+              {order.delivery_status === "in_transit" && (
+                <span className="font-label text-[8.5px] bg-berry text-paper px-1.5 py-0.5 rounded-full uppercase font-bold">
+                  Active
+                </span>
+              )}
+            </div>
+            <p className="font-label text-[10.5px] uppercase tracking-wider font-bold">In Transit</p>
+            <p className="font-body text-[10px] text-ink/50 mt-0.5">Out for delivery</p>
+          </button>
+
+          {/* 3. Missed Attempt / NDR */}
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => setShowNdrDialog(true)}
+            className={`p-3 rounded-[12px] border text-left transition-all cursor-pointer ${
+              order.delivery_status === "retrying"
+                ? "bg-amber-50 border-amber-500 text-amber-900 font-semibold"
+                : "bg-surface/50 border-brand hover:border-amber-300 hover:bg-amber-50/40 text-ink"
+            } disabled:opacity-40`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-base">⚠️</span>
+              {order.delivery_status === "retrying" && (
+                <span className="font-label text-[8.5px] bg-amber-600 text-paper px-1.5 py-0.5 rounded-full uppercase font-bold">
+                  Retry Active
+                </span>
+              )}
+            </div>
+            <p className="font-label text-[10.5px] uppercase tracking-wider font-bold">Missed / NDR</p>
+            <p className="font-body text-[10px] text-ink/50 mt-0.5">Reschedule</p>
+          </button>
+
+          {/* 4. Delivered */}
+          <button
+            type="button"
+            disabled={isPending || order.delivery_status === "delivered"}
+            onClick={() => handleDeliveryStatusChange("delivered")}
+            className={`p-3 rounded-[12px] border text-left transition-all cursor-pointer ${
+              order.delivery_status === "delivered"
+                ? "bg-emerald-50 border-emerald-500 text-emerald-900 font-semibold cursor-default"
+                : "bg-surface/50 border-brand hover:border-emerald-300 hover:bg-emerald-50/40 text-ink"
+            } disabled:opacity-40`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-base">✓</span>
+              {order.delivery_status === "delivered" && (
+                <span className="font-label text-[8.5px] bg-emerald-600 text-paper px-1.5 py-0.5 rounded-full uppercase font-bold">
+                  Finished
+                </span>
+              )}
+            </div>
+            <p className="font-label text-[10.5px] uppercase tracking-wider font-bold">Delivered</p>
+            <p className="font-body text-[10px] text-ink/50 mt-0.5">Completes stock</p>
+          </button>
+
+          {/* 5. Returned / RTO with Inspection */}
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => setShowReturnDialog(true)}
+            className={`p-3 rounded-[12px] border text-left transition-all cursor-pointer ${
+              order.delivery_status === "returned"
+                ? "bg-rose-50 border-rose-500 text-rose-900 font-semibold"
+                : "bg-surface/50 border-brand hover:border-rose-300 hover:bg-rose-50/40 text-ink"
+            } disabled:opacity-40`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-base">↩️</span>
+              {order.delivery_status === "returned" && (
+                <span className="font-label text-[8.5px] bg-rose-600 text-paper px-1.5 py-0.5 rounded-full uppercase font-bold">
+                  Finished
+                </span>
+              )}
+            </div>
+            <p className="font-label text-[10.5px] uppercase tracking-wider font-bold">Return / RTO</p>
+            <p className="font-body text-[10px] text-ink/50 mt-0.5">Restock/Damaged</p>
+          </button>
+        </div>
+      </div>
+
+      {/* ── FINISHED / COMPLETED ORDER BANNER ── */}
+      {(order.delivery_status === "delivered" || order.delivery_status === "returned") && (
+        <div
+          className={`rounded-[18px] p-6 border shadow-soft space-y-3 ${
+            order.delivery_status === "delivered"
+              ? "bg-emerald-50/80 border-emerald-300 text-emerald-950"
+              : order.notes?.includes("write-off") || order.notes?.includes("damaged")
+              ? "bg-rose-50/80 border-rose-300 text-rose-950"
+              : "bg-amber-50/80 border-amber-300 text-amber-950"
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">
+                  {order.delivery_status === "delivered" ? "🏁" : "↩️"}
+                </span>
+                <p className="font-label text-sm uppercase tracking-wider font-bold">
+                  {order.delivery_status === "delivered"
+                    ? "Order Finished — Delivered to Customer"
+                    : order.notes?.includes("write-off") || order.notes?.includes("damaged")
+                    ? "Order Finished — Returned Damaged (Stock Written Off)"
+                    : "Order Finished — Returned & Restocked to Catalog"}
+                </p>
+              </div>
+              <p className="font-body text-xs opacity-80 mt-1 leading-relaxed">
+                {order.delivery_status === "delivered"
+                  ? `Goods successfully reached customer on ${new Date(
+                      order.delivered_at || order.updated_at
+                    ).toLocaleDateString("en-IN")}. Inventory deduction finalized.`
+                  : order.notes?.includes("write-off") || order.notes?.includes("damaged")
+                  ? `Parcel inspected and marked damaged. Physical units were permanently written off from inventory (stock was not restored to available pool).`
+                  : `Parcel inspected and returned in good condition. Reserved units were restored to the available catalog pool.`}
+              </p>
+            </div>
+
+            {order.payment_method === "cod" && order.payment_status === "cod" && (
+              <button
+                type="button"
+                onClick={handleMarkCodRemitted}
+                disabled={isPending}
+                className="px-4 py-2 rounded-[10px] bg-berry text-paper font-label text-[10px] uppercase tracking-wider font-semibold hover:bg-[#580118] cursor-pointer shadow-sm"
+              >
+                💰 Mark COD Remitted to Bank
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── ACTION STAGE 1: WAITING FOR APPROVAL ── */}
       {isWaitingApproval && (
@@ -682,29 +910,42 @@ export function OrderDetailManage({ data }: Props) {
         </div>
       )}
 
-      {/* ── ACTION STAGE 3: LOCAL DELIVERY ── */}
+      {/* ── ACTION STAGE 3: LOCAL DELIVERY DETAILS ── */}
       {isLocal && (
         <div className="rounded-[18px] p-6 bg-paper border border-brand shadow-soft space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-brand">
             <div>
-              <p className="font-label text-[10px] text-ink/45 uppercase tracking-wider font-semibold">
-                Local Hand Delivery
+              <p className="font-label text-xs uppercase tracking-wider font-bold text-ink">
+                🚗 Local Hand Delivery Dispatch
               </p>
               <p className="font-body text-xs text-ink/60 mt-0.5">
-                Delivered locally without external courier charges.
+                Fulfilled directly by store team / local rider without third-party courier.
               </p>
             </div>
 
-            {order.delivery_status !== "delivered" && (
-              <button
-                type="button"
-                onClick={handleMarkLocalDelivered}
-                disabled={isPending}
-                className="px-4 py-2 rounded-[10px] bg-emerald-700 text-paper font-label text-[10px] uppercase tracking-wider font-semibold hover:bg-emerald-800 cursor-pointer disabled:opacity-40"
-              >
-                Mark Delivered ✓
-              </button>
-            )}
+            <span className="font-label text-[10px] px-3 py-1 rounded-full uppercase tracking-wider font-bold bg-surface border border-brand text-ink">
+              Status: {order.delivery_status.replace(/_/g, " ").toUpperCase()}
+            </span>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 text-xs font-body">
+            <div className="p-3.5 rounded-[12px] bg-surface/50 border border-brand">
+              <span className="font-label text-[9.5px] text-ink/40 uppercase tracking-widest block font-semibold mb-1">
+                Dispatch / Rider Notes
+              </span>
+              <p className="text-ink font-medium">
+                {order.notes || "Local delivery assigned to store team."}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-[12px] bg-surface/50 border border-brand">
+              <span className="font-label text-[9.5px] text-ink/40 uppercase tracking-widest block font-semibold mb-1">
+                Delivery Instructions
+              </span>
+              <p className="text-ink/80">
+                Contact customer at <strong className="text-ink">{order.phone || addr?.phone || "Phone on file"}</strong> upon arrival.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -819,6 +1060,38 @@ export function OrderDetailManage({ data }: Props) {
             </p>
 
             <div>
+              <label className="block font-label text-[9.5px] uppercase tracking-wider text-ink/50 font-semibold mb-1.5">
+                Initial Status:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLocalInitialStatus("pending_dropoff")}
+                  className={`p-2.5 rounded-[10px] border text-left cursor-pointer transition-all ${
+                    localInitialStatus === "pending_dropoff"
+                      ? "bg-surface border-berry ring-1 ring-berry text-ink font-semibold"
+                      : "bg-surface/40 border-brand text-ink/70"
+                  }`}
+                >
+                  <p className="font-label text-[10px] uppercase tracking-wider font-bold">📦 Pending Dispatch</p>
+                  <p className="font-body text-[9.5px] text-ink/45 mt-0.5">Packing / ready for rider</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocalInitialStatus("in_transit")}
+                  className={`p-2.5 rounded-[10px] border text-left cursor-pointer transition-all ${
+                    localInitialStatus === "in_transit"
+                      ? "bg-surface border-berry ring-1 ring-berry text-ink font-semibold"
+                      : "bg-surface/40 border-brand text-ink/70"
+                  }`}
+                >
+                  <p className="font-label text-[10px] uppercase tracking-wider font-bold">🚚 Out for Delivery</p>
+                  <p className="font-body text-[9.5px] text-ink/45 mt-0.5">Rider in transit</p>
+                </button>
+              </div>
+            </div>
+
+            <div>
               <label className="block font-label text-[9.5px] uppercase tracking-wider text-ink/50 font-semibold mb-1">
                 Delivery notes (rider, contact, vehicle):
               </label>
@@ -846,6 +1119,177 @@ export function OrderDetailManage({ data }: Props) {
                 className="px-4 py-2 rounded-[9px] bg-berry text-paper font-label text-[10px] uppercase tracking-wider font-bold hover:bg-[#580118] disabled:opacity-40"
               >
                 {isPending ? "Approving…" : "Approve as Local"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── RETURN INSPECTION & INVENTORY RECONCILIATION MODAL ── */}
+      {showReturnDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 backdrop-blur-xs p-4">
+          <div className="bg-paper rounded-[22px] border border-brand p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">↩️</span>
+                <h3 className="font-label text-base font-bold text-ink tracking-tight">
+                  Inspect Returned Parcel — Order #{order.id.slice(0, 8).toUpperCase()}
+                </h3>
+              </div>
+              <p className="font-body text-xs text-ink/65 mt-1 leading-relaxed">
+                Returned items must be inspected before inventory is updated. Choose whether to restock units or write them off as damaged.
+              </p>
+            </div>
+
+            {/* Inspection Outcome Options */}
+            <div className="space-y-3">
+              <label
+                onClick={() => setReturnActionType("restock")}
+                className={`flex items-start gap-3.5 p-3.5 rounded-[14px] border cursor-pointer transition-all ${
+                  returnActionType === "restock"
+                    ? "bg-emerald-50/60 border-emerald-500 shadow-xs"
+                    : "bg-surface/40 border-brand hover:border-ink/20"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="returnAction"
+                  checked={returnActionType === "restock"}
+                  onChange={() => setReturnActionType("restock")}
+                  className="mt-1 accent-emerald-600"
+                />
+                <div>
+                  <p className="font-label text-xs font-bold text-emerald-950 uppercase tracking-wide">
+                    ✓ Good Condition — Restock to Available Catalog
+                  </p>
+                  <p className="font-body text-[11px] text-emerald-900/70 mt-0.5">
+                    Items are unopened, intact, and ready to be sold again. Releases reserved hold back to available stock.
+                  </p>
+                </div>
+              </label>
+
+              <label
+                onClick={() => setReturnActionType("damaged_write_off")}
+                className={`flex items-start gap-3.5 p-3.5 rounded-[14px] border cursor-pointer transition-all ${
+                  returnActionType === "damaged_write_off"
+                    ? "bg-rose-50/70 border-rose-500 shadow-xs"
+                    : "bg-surface/40 border-brand hover:border-ink/20"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="returnAction"
+                  checked={returnActionType === "damaged_write_off"}
+                  onChange={() => setReturnActionType("damaged_write_off")}
+                  className="mt-1 accent-rose-600"
+                />
+                <div>
+                  <p className="font-label text-xs font-bold text-rose-950 uppercase tracking-wide">
+                    💥 Damaged / Broken — Permanent Write-off
+                  </p>
+                  <p className="font-body text-[11px] text-rose-900/70 mt-0.5">
+                    Items were broken in transit or returned unsellable. Permanently decrements warehouse total stock with audit reason &apos;write_off&apos;.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <div>
+              <label className="block font-label text-[9.5px] uppercase tracking-wider text-ink/50 font-semibold mb-1">
+                Inspection Notes (optional):
+              </label>
+              <textarea
+                value={returnNote}
+                onChange={(e) => setReturnNote(e.target.value)}
+                placeholder={returnActionType === "restock" ? "e.g. Package returned intact by courier" : "e.g. Stoneware bowl chipped on rim during return transit"}
+                rows={2}
+                className="w-full p-2.5 rounded-[10px] bg-surface border border-brand font-body text-xs text-ink focus:outline-none focus:border-berry resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-brand">
+              <button
+                type="button"
+                onClick={() => setShowReturnDialog(false)}
+                className="px-4 py-2 rounded-[10px] bg-surface font-label text-[10px] uppercase tracking-wider font-semibold text-ink/70 hover:text-ink border border-brand cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() =>
+                  handleDeliveryStatusChange("returned", {
+                    returnAction: returnActionType,
+                    notes: returnNote || undefined,
+                  })
+                }
+                className={`px-5 py-2 rounded-[10px] font-label text-[10px] uppercase tracking-wider font-bold text-paper cursor-pointer transition-all shadow-sm ${
+                  returnActionType === "restock"
+                    ? "bg-emerald-700 hover:bg-emerald-800"
+                    : "bg-rose-700 hover:bg-rose-800"
+                } disabled:opacity-40`}
+              >
+                {isPending ? "Updating Stock…" : returnActionType === "restock" ? "Restock & Complete Return" : "Write-off & Mark Returned"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MISSED ATTEMPT (NDR) MODAL ── */}
+      {showNdrDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 backdrop-blur-xs p-4">
+          <div className="bg-paper rounded-[22px] border border-brand p-6 max-w-md w-full shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⚠️</span>
+                <h3 className="font-label text-base font-bold text-ink tracking-tight">
+                  Log Undelivered Attempt (NDR)
+                </h3>
+              </div>
+              <p className="font-body text-xs text-ink/65 mt-1">
+                Marks the parcel as retrying and flags it on the admin dashboard for re-dispatch or customer follow-up.
+              </p>
+            </div>
+
+            <div>
+              <label className="block font-label text-[9.5px] uppercase tracking-wider text-ink/50 font-semibold mb-1">
+                Reason for delivery failure:
+              </label>
+              <select
+                value={ndrReasonText}
+                onChange={(e) => setNdrReasonText(e.target.value)}
+                className="w-full p-2.5 rounded-[10px] bg-surface border border-brand font-body text-xs text-ink focus:outline-none focus:border-berry mb-2"
+              >
+                <option value="Customer unavailable / Door locked">Customer unavailable / Door locked</option>
+                <option value="Customer requested reschedule / Delivery date change">Customer requested reschedule / Delivery date change</option>
+                <option value="Incomplete address / Landmark unreachable">Incomplete address / Landmark unreachable</option>
+                <option value="Phone unanswered / Customer not reachable">Phone unanswered / Customer not reachable</option>
+                <option value="Cash on Delivery payment refused / unavailable">Cash on Delivery payment refused / unavailable</option>
+                <option value="Other / Courier operational delay">Other / Courier operational delay</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-brand">
+              <button
+                type="button"
+                onClick={() => setShowNdrDialog(false)}
+                className="px-4 py-2 rounded-[10px] bg-surface font-label text-[10px] uppercase tracking-wider font-semibold text-ink/70 hover:text-ink border border-brand cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() =>
+                  handleDeliveryStatusChange("retrying", {
+                    ndrReason: ndrReasonText,
+                  })
+                }
+                className="px-5 py-2 rounded-[10px] bg-amber-600 hover:bg-amber-700 text-paper font-label text-[10px] uppercase tracking-wider font-bold cursor-pointer transition-all shadow-sm disabled:opacity-40"
+              >
+                {isPending ? "Logging…" : "Log Missed Attempt & Retry"}
               </button>
             </div>
           </div>

@@ -551,7 +551,8 @@ export async function approveAndBookOrderAction(
 
 export async function approveLocalDeliveryOrder(
   orderId: string,
-  note?: string
+  note?: string,
+  initialStatus: DeliveryStatus = "in_transit"
 ): Promise<{ success: boolean; error?: string }> {
   const { admin } = await requireAdmin();
 
@@ -560,7 +561,7 @@ export async function approveLocalDeliveryOrder(
       .from("orders")
       .update({
         fulfillment_mode: "local",
-        delivery_status: "in_transit",
+        delivery_status: initialStatus,
         notes: note ? `Local delivery: ${note}` : undefined,
       })
       .eq("id", orderId);
@@ -572,7 +573,7 @@ export async function approveLocalDeliveryOrder(
       kind: "forward",
       courier_name: "Local Delivery",
       handover_method: "dropoff",
-      status: "in_transit",
+      status: initialStatus,
       booking_step: "done",
     });
 
@@ -705,5 +706,203 @@ export async function markCodRemittedAction(
     return { success: true };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Failed to mark COD remitted" };
+  }
+}
+
+// ─── Manual Delivery Status Override & Inventory Sync ─────────────────────────
+
+export interface UpdateDeliveryStatusInput {
+  orderId: string;
+  targetStatus: DeliveryStatus;
+  returnAction?: "restock" | "damaged_write_off";
+  ndrReason?: string;
+  notes?: string;
+}
+
+export async function updateOrderDeliveryStatusAction(
+  input: UpdateDeliveryStatusInput
+): Promise<{ success: boolean; error?: string }> {
+  const { user, admin } = await requireAdmin();
+  const actor = user?.id || "admin";
+
+  try {
+    const [ordRes, itemsRes, shipRes] = await Promise.all([
+      admin.from("orders").select("*").eq("id", input.orderId).single(),
+      admin.from("order_items").select("*").eq("order_id", input.orderId),
+      admin.from("shipments").select("*").eq("order_id", input.orderId),
+    ]);
+
+    if (ordRes.error || !ordRes.data) return { success: false, error: "Order not found." };
+    const order = ordRes.data;
+    const items = itemsRes.data || [];
+    const shipments = shipRes.data || [];
+    const forwardShipment = shipments.find((s) => s.kind === "forward") || shipments[0];
+
+    const isUUID = (str?: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str || "");
+    const variantItems = items
+      .filter((it) => it.variant_id && isUUID(it.variant_id))
+      .map((it) => ({ variant_id: it.variant_id!, qty: it.qty }));
+
+    // 0. Pending / Preparing Dispatch
+    if (input.targetStatus === "pending_dropoff") {
+      await admin.from("orders").update({ delivery_status: "pending_dropoff" }).eq("id", order.id);
+      if (forwardShipment) {
+        await admin.from("shipments").update({ status: "pending_dropoff" }).eq("id", forwardShipment.id);
+        await admin.from("shipment_events").insert({
+          shipment_id: forwardShipment.id,
+          sr_status: "MANIFESTED",
+          mapped_status: "pending_dropoff",
+          location: input.notes || "Order packed / Ready for dispatch",
+          occurred_at: new Date().toISOString(),
+        });
+      }
+    }
+
+    // 1. In Transit
+    else if (input.targetStatus === "in_transit") {
+      await admin.from("orders").update({ delivery_status: "in_transit" }).eq("id", order.id);
+      if (forwardShipment) {
+        await admin.from("shipments").update({ status: "in_transit" }).eq("id", forwardShipment.id);
+        await admin.from("shipment_events").insert({
+          shipment_id: forwardShipment.id,
+          sr_status: "IN_TRANSIT",
+          mapped_status: "in_transit",
+          location: "Dispatched by Admin",
+          occurred_at: new Date().toISOString(),
+        });
+      }
+    }
+
+    // 2. Delivered
+    else if (input.targetStatus === "delivered") {
+      await admin.from("orders").update({
+        delivery_status: "delivered",
+        delivered_at: new Date().toISOString(),
+      }).eq("id", order.id);
+
+      if (forwardShipment) {
+        await admin.from("shipments").update({ status: "delivered" }).eq("id", forwardShipment.id);
+        await admin.from("shipment_events").insert({
+          shipment_id: forwardShipment.id,
+          sr_status: "DELIVERED",
+          mapped_status: "delivered",
+          location: "Delivered to Customer",
+          occurred_at: new Date().toISOString(),
+        });
+      }
+
+      // Stock completion: goods permanently left the warehouse
+      if (variantItems.length > 0) {
+        await admin.rpc("complete_stock", {
+          p_order_id: order.id,
+          p_items_json: variantItems,
+          p_actor: actor,
+        });
+      }
+    }
+
+    // 3. Retrying / Missed Attempt (NDR)
+    else if (input.targetStatus === "retrying") {
+      await admin.from("orders").update({
+        delivery_status: "retrying",
+        needs_attention: true,
+      }).eq("id", order.id);
+
+      if (forwardShipment) {
+        await admin.from("shipments").update({ status: "retrying" }).eq("id", forwardShipment.id);
+        await admin.from("shipment_events").insert({
+          shipment_id: forwardShipment.id,
+          sr_status: "UNDELIVERED_ATTEMPT",
+          mapped_status: "retrying",
+          location: input.ndrReason || "Customer unavailable / Missed delivery",
+          occurred_at: new Date().toISOString(),
+        });
+        await admin.from("ndr_cases").insert({
+          shipment_id: forwardShipment.id,
+          reason: input.ndrReason || "Delivery attempt failed / Reschedule required",
+          action_taken: "Admin logged retry attempt",
+        });
+      }
+    }
+
+    // 4. Returned / RTO
+    else if (input.targetStatus === "returned") {
+      await admin.from("orders").update({
+        delivery_status: "returned",
+        needs_attention: false,
+      }).eq("id", order.id);
+
+      if (forwardShipment) {
+        await admin.from("shipments").update({ status: "returned" }).eq("id", forwardShipment.id);
+        await admin.from("shipment_events").insert({
+          shipment_id: forwardShipment.id,
+          sr_status: "RTO_DELIVERED",
+          mapped_status: "returned",
+          location: "Returned to Origin Warehouse",
+          occurred_at: new Date().toISOString(),
+        });
+      }
+
+      // Sensible stock handling:
+      for (const vit of variantItems) {
+        if (input.returnAction === "damaged_write_off") {
+          // Direct adjustment via stock_movements
+          const { data: vRow } = await admin.from("product_variants").select("total_stock, withheld_stock").eq("id", vit.variant_id).single();
+          if (vRow) {
+            const newTotal = Math.max(0, vRow.total_stock - vit.qty);
+            const newWithheld = Math.max(0, vRow.withheld_stock - vit.qty);
+            await admin.from("product_variants").update({
+              total_stock: newTotal,
+              withheld_stock: newWithheld,
+            }).eq("id", vit.variant_id);
+
+            await admin.from("stock_movements").insert({
+              variant_id: vit.variant_id,
+              order_id: order.id,
+              delta_total: -vit.qty,
+              delta_withheld: -vit.qty,
+              reason: "write_off",
+              actor,
+              note: input.notes || "Parcel returned damaged / unsellable write-off",
+            });
+          }
+        } else {
+          // Restock: release withheld stock back to available pool
+          const { data: vRow } = await admin.from("product_variants").select("withheld_stock").eq("id", vit.variant_id).single();
+          if (vRow) {
+            const newWithheld = Math.max(0, vRow.withheld_stock - vit.qty);
+            await admin.from("product_variants").update({
+              withheld_stock: newWithheld,
+            }).eq("id", vit.variant_id);
+
+            await admin.from("stock_movements").insert({
+              variant_id: vit.variant_id,
+              order_id: order.id,
+              delta_total: 0,
+              delta_withheld: -vit.qty,
+              reason: "rto_restocked",
+              actor,
+              note: input.notes || "Returned parcel inspected in good condition - Restocked",
+            });
+          }
+        }
+      }
+    }
+
+    // 5. General status fallback
+    else {
+      await admin.from("orders").update({ delivery_status: input.targetStatus }).eq("id", order.id);
+    }
+
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${order.id}`);
+    revalidatePath("/admin/inventory");
+    revalidatePath("/shop");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to update delivery status",
+    };
   }
 }

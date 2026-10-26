@@ -38,6 +38,14 @@ export function AddProductModal({ onClose, categories }: Props) {
   const [stock, setStock] = useState("0");
   const [unitCost, setUnitCost] = useState("");
   const [description, setDescription] = useState("");
+  const [story, setStory] = useState("");
+  const [curatorNote, setCuratorNote] = useState("");
+  const [origin, setOrigin] = useState("");
+  const [artisanName, setArtisanName] = useState("");
+  const [weightGrams, setWeightGrams] = useState("500");
+  const [lengthCm, setLengthCm] = useState("18");
+  const [breadthCm, setBreadthCm] = useState("14");
+  const [heightCm, setHeightCm] = useState("10");
   const [tags, setTags] = useState("");
 
   // Image state
@@ -147,6 +155,14 @@ export function AddProductModal({ onClose, categories }: Props) {
         stock: parseInt(stock, 10) || 0,
         unitCost: parseFloat(unitCost) || 0,
         description: description.trim(),
+        story: story.trim() || description.trim(),
+        curatorNote: curatorNote.trim() || undefined,
+        origin: origin.trim() || undefined,
+        artisanName: artisanName.trim() || undefined,
+        weightGrams: weightGrams ? parseInt(weightGrams, 10) : undefined,
+        lengthCm: lengthCm ? parseFloat(lengthCm) : undefined,
+        breadthCm: breadthCm ? parseFloat(breadthCm) : undefined,
+        heightCm: heightCm ? parseFloat(heightCm) : undefined,
         tags: tagList,
         imageUrls,
       });
@@ -298,18 +314,129 @@ export function AddProductModal({ onClose, categories }: Props) {
               )}
             </div>
 
-            {/* Description */}
+            {/* Origin & Artisan Name */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                  Origin / Heritage Location
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Udaipur, Rajasthan"
+                  value={origin}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                  Artisan / Studio Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Master Rameshwar Ji"
+                  value={artisanName}
+                  onChange={(e) => setArtisanName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Curator Note */}
             <div>
               <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
-                Description
+                Curator&apos;s Note <span className="text-ink/35 normal-case font-normal">· callout quote under price</span>
               </label>
-              <textarea
-                rows={3}
-                placeholder="Describe the product, its craftsmanship, materials…"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all resize-none"
+              <input
+                type="text"
+                placeholder="e.g. Takes fountain pen ink with zero bleed."
+                value={curatorNote}
+                onChange={(e) => setCuratorNote(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink italic bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all"
               />
+            </div>
+
+            {/* Story & Description */}
+            <div className="space-y-4">
+              <div>
+                <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                  The Story Narrative <span className="text-ink/35 normal-case font-normal">· &quot;The Story&quot; tab on product page</span>
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Generational heritage, materials, backstory…"
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                  Short Description
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Overview summary…"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] font-body text-sm text-ink bg-surface/50 border border-brand outline-none focus:border-berry focus:bg-paper placeholder:text-ink/30 transition-all resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Shipping Specs & Dimensions */}
+            <div>
+              <label className="font-label text-[10.5px] text-ink/60 uppercase tracking-wider block mb-1.5 font-semibold">
+                Shipping Specs (Weight &amp; Dimensions)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <span className="font-label text-[9px] uppercase tracking-wider text-ink/40 block mb-0.5">Weight (g)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={weightGrams}
+                    onChange={(e) => setWeightGrams(e.target.value)}
+                    placeholder="500"
+                    className="w-full px-3 py-1.5 rounded-[8px] font-mono text-xs text-ink bg-surface/50 border border-brand"
+                  />
+                </div>
+                <div>
+                  <span className="font-label text-[9px] uppercase tracking-wider text-ink/40 block mb-0.5">L (cm)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={lengthCm}
+                    onChange={(e) => setLengthCm(e.target.value)}
+                    placeholder="18"
+                    className="w-full px-3 py-1.5 rounded-[8px] font-mono text-xs text-ink bg-surface/50 border border-brand"
+                  />
+                </div>
+                <div>
+                  <span className="font-label text-[9px] uppercase tracking-wider text-ink/40 block mb-0.5">B (cm)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={breadthCm}
+                    onChange={(e) => setBreadthCm(e.target.value)}
+                    placeholder="14"
+                    className="w-full px-3 py-1.5 rounded-[8px] font-mono text-xs text-ink bg-surface/50 border border-brand"
+                  />
+                </div>
+                <div>
+                  <span className="font-label text-[9px] uppercase tracking-wider text-ink/40 block mb-0.5">H (cm)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={heightCm}
+                    onChange={(e) => setHeightCm(e.target.value)}
+                    placeholder="10"
+                    className="w-full px-3 py-1.5 rounded-[8px] font-mono text-xs text-ink bg-surface/50 border border-brand"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Tags */}

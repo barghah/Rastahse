@@ -157,13 +157,19 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
         {/* Info */}
         <div className="mt-3 px-0.5">
-          {/* Category & Origin tag */}
+          {/* Category & Origin / Artisan tag */}
           <div className="flex items-center gap-1.5 font-label text-[9px] text-ink/45 mb-1 truncate">
             <span className="capitalize">{product.categorySlug}</span>
             {product.origin && (
               <>
                 <span>·</span>
                 <span className="truncate">{product.origin}</span>
+              </>
+            )}
+            {product.artisanName && (
+              <>
+                <span>·</span>
+                <span className="truncate text-ink/60">by {product.artisanName}</span>
               </>
             )}
           </div>

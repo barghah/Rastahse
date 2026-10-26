@@ -16,6 +16,54 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      customer_addresses: {
+        Row: {
+          id: string;
+          user_id: string;
+          label: string;
+          full_name: string;
+          phone: string;
+          line1: string;
+          line2: string | null;
+          city: string;
+          state: string;
+          pincode: string;
+          is_default: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          label?: string;
+          full_name: string;
+          phone: string;
+          line1: string;
+          line2?: string | null;
+          city: string;
+          state: string;
+          pincode: string;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          label?: string;
+          full_name?: string;
+          phone?: string;
+          line1?: string;
+          line2?: string | null;
+          city?: string;
+          state?: string;
+          pincode?: string;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       orders: {
         Row: {
           id: string;
@@ -776,6 +824,45 @@ export interface Database {
         };
         Relationships: [];
       };
+
+      product_price_history: {
+        Row: {
+          id: string;
+          product_id: string;
+          cost_price: number | null;
+          regular_price: number;
+          offer_price: number | null;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id: string;
+          cost_price?: number | null;
+          regular_price: number;
+          offer_price?: number | null;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string;
+          cost_price?: number | null;
+          regular_price?: number;
+          offer_price?: number | null;
+          note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "product_price_history_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
 
     Views: Record<string, never>;
@@ -843,3 +930,4 @@ export type ShipmentEventRow = Database["public"]["Tables"]["shipment_events"]["
 export type NdrCaseRow = Database["public"]["Tables"]["ndr_cases"]["Row"];
 export type ShopSettingsRow = Database["public"]["Tables"]["shop_settings"]["Row"];
 export type PickupLocationRow = Database["public"]["Tables"]["pickup_locations"]["Row"];
+export type ProductPriceHistoryRow = Database["public"]["Tables"]["product_price_history"]["Row"];

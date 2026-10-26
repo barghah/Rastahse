@@ -28,6 +28,7 @@ export interface CreateOrderInput {
   shippingFee: number;
   total: number;
   shippingAddress: ShippingAddress;
+  userId?: string;
 }
 
 /**
@@ -67,6 +68,7 @@ export async function createOrder(input: CreateOrderInput) {
     .insert({
       email: input.email,
       phone: input.phone ?? null,
+      user_id: input.userId ?? null,
       status: "pending",
       items: input.items as unknown as import("@/types/supabase").Json,
       subtotal: input.subtotal,

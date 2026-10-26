@@ -684,6 +684,14 @@ export interface CreateProductInput {
   price: number; // in paise
   stock: number;
   description: string;
+  story?: string;
+  curatorNote?: string;
+  origin?: string;
+  artisanName?: string;
+  weightGrams?: number;
+  lengthCm?: number;
+  breadthCm?: number;
+  heightCm?: number;
   tags: string[];
   imageUrls: string[];
   /** Cost per unit in rupees. When stock > 0 this debits the accounting ledger. */
@@ -719,7 +727,14 @@ export async function createProduct(
       slug: `${slug}-${Date.now().toString().slice(-4)}`,
       name: input.title.trim(),
       description: input.description || "",
-      story: input.description || "",
+      story: input.story || input.description || "",
+      curator_note: input.curatorNote || null,
+      origin: input.origin || null,
+      artisan_name: input.artisanName || null,
+      weight_grams: input.weightGrams || null,
+      length_cm: input.lengthCm || null,
+      breadth_cm: input.breadthCm || null,
+      height_cm: input.heightCm || null,
       category_id: catData?.id ?? null,
       base_price: input.price,
       cost_price: input.unitCost ? Math.round(input.unitCost * 100) : null,
@@ -743,6 +758,7 @@ export async function createProduct(
         total_stock: input.stock || 0,
         withheld_stock: 0,
         low_stock_threshold: 2,
+        weight_grams: input.weightGrams || null,
       })
       .select("id")
       .single();
@@ -917,6 +933,67 @@ export async function updateProductName(
   }
 }
 
+export interface UpdateProductDetailsInput {
+  productId: string;
+  name?: string;
+  description?: string;
+  story?: string;
+  curatorNote?: string;
+  origin?: string;
+  artisanName?: string;
+  tags?: string[];
+  weightGrams?: number | null;
+  lengthCm?: number | null;
+  breadthCm?: number | null;
+  heightCm?: number | null;
+}
+
+export async function updateProductDetailsAction(
+  input: UpdateProductDetailsInput
+): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
+  try {
+    const admin = await createAdminClient();
+    const updatePayload: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (input.name !== undefined) updatePayload.name = input.name.trim();
+    if (input.description !== undefined) updatePayload.description = input.description.trim();
+    if (input.story !== undefined) updatePayload.story = input.story.trim();
+    if (input.curatorNote !== undefined) updatePayload.curator_note = input.curatorNote.trim() || null;
+    if (input.origin !== undefined) updatePayload.origin = input.origin.trim() || null;
+    if (input.artisanName !== undefined) updatePayload.artisan_name = input.artisanName.trim() || null;
+    if (input.tags !== undefined) updatePayload.tags = input.tags;
+    if (input.weightGrams !== undefined) updatePayload.weight_grams = input.weightGrams;
+    if (input.lengthCm !== undefined) updatePayload.length_cm = input.lengthCm;
+    if (input.breadthCm !== undefined) updatePayload.breadth_cm = input.breadthCm;
+    if (input.heightCm !== undefined) updatePayload.height_cm = input.heightCm;
+
+    const { error } = await admin
+      .from("products")
+      .update(updatePayload as any)
+      .eq("id", input.productId);
+
+    if (error) return { success: false, error: error.message };
+
+    if (input.weightGrams !== undefined) {
+      await admin
+        .from("product_variants")
+        .update({ weight_grams: input.weightGrams })
+        .eq("product_id", input.productId);
+    }
+
+    purgeCatalogCache();
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to update product details",
+    };
+  }
+}
+
 export async function updateProductImages(
   productId: string,
   images: Array<{ url: string; alt?: string }>,
@@ -980,5 +1057,134 @@ export async function getDbProducts(): Promise<DbProduct[]> {
   } catch {
     return [];
   }
+}
+
+// ─── Direct Stock Count Override ──────────────────────────────────────────────
+
+export async function overrideProductStockAction(input: {
+  productId: string;
+  variantId?: string;
+  newStock: number;
+  note?: string;
+}): Promise<{ success: boolean; error?: string; availableStock?: number }> {
+  const { user, admin } = await requireAdmin();
+  try {
+    const targetStock = Math.max(0, Math.floor(input.newStock));
+
+    // Find variant
+    let variantQuery = admin.from("product_variants").select("id, total_stock, withheld_stock");
+    if (input.variantId) {
+      variantQuery = variantQuery.eq("id", input.variantId);
+    } else {
+      variantQuery = variantQuery.eq("product_id", input.productId).limit(1);
+    }
+
+    const { data: vRow, error: vErr } = await variantQuery.maybeSingle();
+    if (vErr || !vRow) return { success: false, error: "Product variant not found." };
+
+    const currentTotal = vRow.total_stock;
+    const delta = targetStock - currentTotal;
+
+    // Direct update
+    const { error: updErr } = await admin
+      .from("product_variants")
+      .update({ total_stock: targetStock })
+      .eq("id", vRow.id);
+
+    if (updErr) return { success: false, error: updErr.message };
+
+    // Audit in stock_movements
+    if (delta !== 0) {
+      await admin.from("stock_movements").insert({
+        variant_id: vRow.id,
+        delta_total: delta,
+        delta_withheld: 0,
+        reason: "manual_adjustment",
+        actor: user?.id || "admin",
+        note: input.note || `Stock count set to ${targetStock} (was ${currentTotal})`,
+      });
+    }
+
+    purgeCatalogCache();
+    const available = Math.max(0, targetStock - vRow.withheld_stock);
+    return { success: true, availableStock: available };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to override stock." };
+  }
+}
+
+// ─── Three-Tier Pricing & Offer Management ───────────────────────────────────
+
+export interface UpdatePricingInput {
+  productId: string;
+  costPrice?: number;    // in Rupees
+  regularPrice: number;  // in Rupees (standard selling price)
+  offerPrice?: number;   // in Rupees (promotional price)
+  note?: string;
+}
+
+export async function updateProductPricingAction(
+  input: UpdatePricingInput
+): Promise<{ success: boolean; error?: string }> {
+  const { user, admin } = await requireAdmin();
+
+  try {
+    const regPaise = Math.round(input.regularPrice * 100);
+    const costPaise = input.costPrice !== undefined ? Math.round(input.costPrice * 100) : null;
+    const offerPaise = input.offerPrice !== undefined && input.offerPrice > 0
+      ? Math.round(input.offerPrice * 100)
+      : null;
+
+    // If an offer price is specified and lower than regular price:
+    // base_price = offerPrice (what buyer pays)
+    // compare_price = regularPrice (strikethrough on storefront)
+    let basePrice = regPaise;
+    let comparePrice: number | null = null;
+
+    if (offerPaise !== null && offerPaise < regPaise) {
+      basePrice = offerPaise;
+      comparePrice = regPaise;
+    }
+
+    const { error: prodErr } = await admin
+      .from("products")
+      .update({
+        base_price: basePrice,
+        compare_price: comparePrice,
+        cost_price: costPaise,
+      })
+      .eq("id", input.productId);
+
+    if (prodErr) return { success: false, error: prodErr.message };
+
+    // Record immutable audit entry in product_price_history
+    await admin.from("product_price_history").insert({
+      product_id: input.productId,
+      cost_price: costPaise,
+      regular_price: regPaise,
+      offer_price: offerPaise,
+      note: input.note || (offerPaise ? `Offer set to ₹${input.offerPrice}` : "Pricing updated"),
+    });
+
+    purgeCatalogCache();
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to update pricing." };
+  }
+}
+
+// ─── Price History Query ──────────────────────────────────────────────────────
+
+export async function getProductPriceHistoryAction(productId: string) {
+  const { admin } = await requireAdmin();
+
+  const { data, error } = await admin
+    .from("product_price_history")
+    .select("*")
+    .eq("product_id", productId)
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
+  return data || [];
 }
 
