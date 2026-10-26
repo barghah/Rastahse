@@ -1,16 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { adminSignInAction } from "@/actions/admin";
 
 /**
  * AdminLoginPage — Email + password login for admin users in Rastah's signature light paper theme.
  */
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,19 +19,15 @@ export default function AdminLoginPage() {
     setError(null);
 
     startTransition(async () => {
-      const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const res = await adminSignInAction({ email, password });
 
-      if (authError) {
-        setError("Invalid email or password.");
+      if (!res.success) {
+        setError(res.error || "Invalid email or password.");
         return;
       }
 
-      router.push("/admin");
-      router.refresh();
+      // Hard redirect to ensure browser reloads with all fresh session cookies
+      window.location.href = "/admin/orders";
     });
   }
 

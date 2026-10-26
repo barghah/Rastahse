@@ -52,6 +52,55 @@ export const requireAdmin = cache(async () => {
   return { user, admin };
 });
 
+export async function adminSignInAction(input: {
+  email: string;
+  password: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const email = input.email?.trim();
+    const password = input.password;
+
+    if (!email || !password) {
+      return { success: false, error: "Please enter both email and password." };
+    }
+
+    const supabase = await createClient();
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError || !data?.user) {
+      return { success: false, error: authError?.message || "Invalid email or password." };
+    }
+
+    // Verify admin role in profiles table using service role client
+    const admin = await createAdminClient();
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    if (!profile?.is_admin) {
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: "Access denied. This account does not have admin privileges.",
+      };
+    }
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/orders");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Authentication failed.",
+    };
+  }
+}
+
 // ─── Stats ─────────────────────────────────────────────────────────────────────
 export async function getAdminStats() {
   await requireAdmin();
