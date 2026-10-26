@@ -33,10 +33,35 @@ export interface CreateOrderInput {
 /**
  * Create a pending order in Supabase and return the order id.
  * Called before initiating Razorpay payment.
+ * Automatically validates and reserves stock using Postgres row locks.
  */
 export async function createOrder(input: CreateOrderInput) {
   const supabase = await createAdminClient();
 
+  // 1. Resolve variant IDs for all items in cart
+  const isUUID = (str?: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str || "");
+  const reservationItems: { variant_id: string; qty: number }[] = [];
+
+  for (const item of input.items) {
+    let vId = item.variantId;
+    if (!isUUID(vId)) {
+      const { data: vRow } = await supabase
+        .from("product_variants")
+        .select("id")
+        .or(`product_id.eq.${item.productId},sku.eq.${item.variantId}`)
+        .limit(1)
+        .maybeSingle();
+      if (vRow?.id) {
+        vId = vRow.id;
+        item.variantId = vRow.id;
+      }
+    }
+    if (isUUID(vId)) {
+      reservationItems.push({ variant_id: vId, qty: item.quantity });
+    }
+  }
+
+  // 2. Insert pending order
   const { data, error } = await supabase
     .from("orders")
     .insert({
@@ -55,6 +80,21 @@ export async function createOrder(input: CreateOrderInput) {
   if (error) {
     console.error("[createOrder] Supabase error:", error);
     throw new Error("Failed to create order. Please try again.");
+  }
+
+  // 3. Atomically reserve stock
+  if (reservationItems.length > 0) {
+    const { error: reserveErr } = await supabase.rpc("reserve_stock", {
+      p_order_id: data.id,
+      p_items_json: reservationItems,
+      p_actor: input.email || "storefront_checkout",
+    });
+
+    if (reserveErr) {
+      await supabase.from("orders").delete().eq("id", data.id);
+      console.warn("[createOrder] Stock reservation rejected:", reserveErr.message);
+      throw new Error(`One or more items are out of stock: ${reserveErr.message}`);
+    }
   }
 
   return { orderId: data.id };

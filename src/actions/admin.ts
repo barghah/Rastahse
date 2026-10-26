@@ -122,8 +122,55 @@ export async function updateOrderStatus(
     const { error } = await admin.from("orders").update(update).eq("id", id);
     if (error) return { success: false, error: error.message };
 
-    // Order completed → credit sales revenue + reduce stock (idempotent)
-    if (status === "delivered") {
+    // Stock state synchronization
+    if (status === "cancelled") {
+      try {
+        const { data: ord } = await admin.from("orders").select("items").eq("id", id).single();
+        if (ord?.items && Array.isArray(ord.items)) {
+          const isUUID = (str?: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str || "");
+          const toRelease = (ord.items as any[])
+            .map((it) => ({
+              variant_id: isUUID(it.variantId || it.variant_id) ? (it.variantId || it.variant_id) : null,
+              qty: it.quantity || it.qty || 1,
+            }))
+            .filter((x): x is { variant_id: string; qty: number } => Boolean(x.variant_id));
+
+          if (toRelease.length > 0) {
+            await admin.rpc("release_stock", {
+              p_order_id: id,
+              p_items_json: toRelease,
+              p_actor: "admin_cancellation",
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("[updateOrderStatus] release_stock warning:", err);
+      }
+    } else if (status === "delivered") {
+      try {
+        const { data: ord } = await admin.from("orders").select("items").eq("id", id).single();
+        if (ord?.items && Array.isArray(ord.items)) {
+          const isUUID = (str?: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str || "");
+          const toComplete = (ord.items as any[])
+            .map((it) => ({
+              variant_id: isUUID(it.variantId || it.variant_id) ? (it.variantId || it.variant_id) : null,
+              qty: it.quantity || it.qty || 1,
+            }))
+            .filter((x): x is { variant_id: string; qty: number } => Boolean(x.variant_id));
+
+          if (toComplete.length > 0) {
+            await admin.rpc("complete_stock", {
+              p_order_id: id,
+              p_items_json: toComplete,
+              p_actor: "admin_delivered",
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("[updateOrderStatus] complete_stock warning:", err);
+      }
+
+      // Order completed → credit sales revenue + reduce stock (idempotent)
       const res = await recordOrderCompletion(admin, id);
       if (res.error) {
         return { success: true, error: `Order saved, but ledger sync failed: ${res.error}` };

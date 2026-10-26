@@ -9,7 +9,8 @@
     "lint": "eslint",
     "migrate:catalog": "dotenv -e .env.local -- tsx scripts/migrate-catalog.ts",
     "migrate:catalog:dry": "dotenv -e .env.local -- tsx scripts/migrate-catalog.ts --dry-run",
-    "migrate:catalog:skip-images": "dotenv -e .env.local -- tsx scripts/migrate-catalog.ts --skip-images"
+    "migrate:catalog:skip-images": "dotenv -e .env.local -- tsx scripts/migrate-catalog.ts --skip-images",
+    "test:concurrency": "dotenv -e .env.local -- tsx scripts/test-stock-concurrency.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
